@@ -9,6 +9,7 @@
     <string name="example_text_placeholder">Some short sentence with the word</string>
     <string name="title_activity_login">Sign in</string>
     <string name="welcome_place_holder">Welcome to the App</string>
+    <string name="long_description_holder">Some very, very long description about the word, maybe from an article with test bla bla bla bla bla</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -22,4 +23,8 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="title_activity_categories_activity">CategoriesActivityActivity</string>
+
+
+    <string name="categories_label">Categories</string>
 </resources>
