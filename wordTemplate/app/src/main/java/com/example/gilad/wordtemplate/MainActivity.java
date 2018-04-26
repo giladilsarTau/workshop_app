@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,9 +16,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    Fragment currentFragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +38,14 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        if(currentFragment == null) {
+            WordDisplayFragment displayFragment = new WordDisplayFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, displayFragment).commit();
+            currentFragment = displayFragment;
+        }
+
     }
 
     @Override
@@ -42,6 +56,21 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+    }
+
+    public void replaceToHints(String word){
+        WordHintFragment newFragment = new WordHintFragment();
+
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+    // Replace whatever is in the fragment_container view with this fragment,
+    // and add the transaction to the back stack so the user can navigate back
+        transaction.replace(R.id.fragment_container, newFragment);
+        Log.e("SOME TAGGGG", "replaceToHints:   commiting the replacement");
+    // Commit the transaction
+        transaction.commit();
+        currentFragment = newFragment;
     }
 
 //    @Override

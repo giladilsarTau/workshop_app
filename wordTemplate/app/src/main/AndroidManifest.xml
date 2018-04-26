@@ -36,6 +36,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.gilad.wordtemplate.MainActivity" />
         </activity>
+        <activity android:name=".WordHintFragment"></activity>
     </application>
 
 </manifest>
