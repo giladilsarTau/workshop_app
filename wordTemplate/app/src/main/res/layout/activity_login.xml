@@ -18,7 +18,7 @@
         <TextView
             android:id="@+id/textView3"
             android:layout_width="355dp"
-            android:layout_height="170dp"
+            android:layout_height="258dp"
             android:lineSpacingExtra="24sp"
             android:text="@string/welcome_place_holder"
             android:textAlignment="center"

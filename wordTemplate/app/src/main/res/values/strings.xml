@@ -2,14 +2,13 @@
     <string name="app_name">wordTemplate</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Motty</string>
+    <string name="nav_header_subtitle">maylogin@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="example_text_placeholder">Some short sentence with the word</string>
+    <string name="example_text_placeholder">"a space station run by androids"</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="welcome_place_holder">Welcome to the App</string>
-    <string name="long_description_holder">Some very, very long description about the word, maybe from an article with test bla bla bla bla bla</string>
+    <string name="welcome_place_holder">Welcome to the Trendy Words</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -24,7 +23,10 @@
         completions."
     </string>
     <string name="title_activity_categories_activity">CategoriesActivityActivity</string>
+    <string name="long_description_holder">Some very, very long description about the word, maybe from an article with test bla bla bla bla bla</string>
+
 
 
     <string name="categories_label">Categories</string>
+    <string name="long_place_golder">With over a million apps and games, Google Play has something for everyone. Browse and install your favorite Android apps and games on your Android phone, tablet, TV or from the Web.</string>
 </resources>

@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/drawer_top"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/nav_cats"
             android:icon="@drawable/ic_menu_slideshow"
@@ -12,6 +14,17 @@
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_menu_manage"
             android:title="Settings" />
+
+    </group>
+    <group
+        android:id="@+id/drawer_bottom"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/logout"
+            android:icon="@drawable/ic_logout"
+            android:title="Logout" />
+
     </group>
 
 </menu>

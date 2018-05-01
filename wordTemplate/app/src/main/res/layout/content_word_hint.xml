@@ -7,35 +7,41 @@
     tools:context=".WordHintFragment">
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:gravity="top"
+        android:layout_width="0dp"
+        android:layout_height="446dp"
+        android:layout_marginBottom="33dp"
+        android:layout_marginTop="80dp"
+        android:gravity="bottom"
         android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         tools:layout_editor_absoluteX="0dp">
 
         <TextView
             android:id="@+id/textView5"
             android:layout_width="match_parent"
-            android:layout_height="86dp"
-            android:text="Word"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            android:text="Andoid"
             android:textAlignment="center"
             android:textSize="30sp" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/FirstHint"
             android:layout_width="match_parent"
             android:layout_height="58dp"
-            android:text="@string/example_text_placeholder" />
+            android:text="@string/example_text_placeholder"
+            android:visibility="invisible" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/SecondHint"
             android:layout_width="match_parent"
             android:layout_height="92dp"
-            android:text="@string/long_description_holder" />
+            android:text="@string/long_place_golder"
+            android:visibility="invisible" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -80,7 +86,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/give_up_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -88,7 +94,7 @@
                 android:text="Don't Know..." />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/MoreHintsBtn"
                 android:layout_width="116dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
