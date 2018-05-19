@@ -1,88 +1,156 @@
 package com.example.gilad.wordtemplate;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class WordHintFragment extends Fragment {
-
-    String word;
-    String translation;
-    public void setWord(String s){this.word = s;}
 
 
+public class WordHintFragment extends DialogFragment {
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static String WORD = "param1";
+    private static String HINT_1 = "param2";
+    private static String HINT_2 = "param3";
 
+    private Button gotItButton;
+    private Button hintBtn;
+
+    boolean isHint1 = false;
+    boolean isHint2 = false;
+
+    private TextView hint1;
+    private TextView hint2;
+
+    private OnFragmentInteractionListener mListener;
+
+
+    public WordHintFragment() {
+        // Required empty public constructor
+    }
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param param1 Parameter 1.
+     * @param param2 Parameter 2.
+     * @return A new instance of fragment WordHintFragment.
+     */
+    // TODO: Rename and change types and number of parameters
+    public static WordHintFragment newInstance(String param1, String param2, String param3) {
+        WordHintFragment fragment = new WordHintFragment();
+        Bundle args = new Bundle();
+        args.putString(WORD, param1);
+        args.putString(HINT_1, param2);
+        args.putString(HINT_2, param3);
+        fragment.setArguments(args);
+
+        WordHintFragment.WORD = param1;
+        WordHintFragment.HINT_1 = param2;
+        WordHintFragment.HINT_2 = param3;
+
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_hints, container, false);
+        ((TextView)view.findViewById(R.id.transWord)).setText(WORD);
+        ((TextView)view.findViewById(R.id.hint1)).setText(HINT_1);
+        ((TextView)view.findViewById(R.id.hint2)).setText(HINT_2);
 
 
-        return inflater.inflate(R.layout.content_word_hint, container, false);
+        //Find the gotItButton
+        gotItButton = view.findViewById(R.id.back);
+        gotItButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getDialog().dismiss();
+                //TODO new word
+            }
+        });
+
+
+
+        hint1 = view.findViewById(R.id.hint1);
+        hint2 =  view.findViewById(R.id.hint2);
+
+        if(!isHint1) hint1.setVisibility(View.INVISIBLE);
+        if(!isHint2) hint2.setVisibility(View.INVISIBLE);
+
+
+        hintBtn = view.findViewById(R.id.next_hint);
+
+        hintBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isHint1) {
+                    hint1.setVisibility(View.VISIBLE);
+                    isHint1 = true;
+                    //TODO reduce score
+                }
+                else if(!isHint2){
+                    hint2.setVisibility(View.VISIBLE);
+                    isHint2 = true;
+                    //TODO reduce score
+                    ((ViewGroup)v.getParent()).removeView(v);
+                }
+            }
+        });
+
+        if(isHint2)
+            ((ViewGroup)hintBtn.getParent()).removeView(hintBtn);
+        
+        return view;
     }
 
     @Override
-    public void onViewCreated(View view,  Bundle savedInstanceState){
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
-        Button moreHintBtn = view.findViewById(R.id.MoreHintsBtn);
+        super.onViewCreated(view, savedInstanceState);
+        ((TextView)view.findViewById(R.id.transWord)).setText(WORD);
+        getDialog().setTitle("Hints");
 
-        moreHintBtn.setOnClickListener(new HintListener(view));
-
-        Button giveUpbtn = view.findViewById(R.id.give_up_button);
-        giveUpbtn.setOnClickListener(new GiveUpListener(word,translation ));
     }
 
-
-    private static class HintListener implements View.OnClickListener{
-
-        View fragView;
-
-        private HintListener(View v){this.fragView = v;}
-
-
-        @Override
-        public void onClick(View v) {
-            TextView hint1 = fragView.findViewById(R.id.FirstHint);
-            TextView hint2 = fragView.findViewById(R.id.SecondHint);
-            if(hint1.getVisibility() == View.INVISIBLE){
-                hint1.setVisibility(View.VISIBLE);
-                return;
-            }
-            hint2.setVisibility(View.VISIBLE);
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
         }
     }
 
-    private class GiveUpListener implements View.OnClickListener{
-
-        String word;
-        String translation;
-
-        private GiveUpListener(String word, String translation) {
-            this.word = word;
-            this.translation = translation;
-        }
-
-        private void showEditDialog() {
-
-
-            FragmentManager fm = getChildFragmentManager();
-
-            TranslationFragment tf = TranslationFragment.newInstance("Android", "1.The coolest OS ever\n 2.(in science fiction) a robot with a human appearance.\n 3. Hebrew comes here");
-
-            tf.show(fm, "fragment_edit_name");
-
-        }
-
-        @Override
-        public void onClick(View v) {
-            this.showEditDialog();
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
         }
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
+
 }

@@ -8,9 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WordDisplayFragment extends Fragment {
 
     String word = "Word";
+    String translation = "אנדרואיד";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -23,25 +27,29 @@ public class WordDisplayFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
 
-        Button hintsBtn = (Button)view.findViewById(R.id.goToHints);
-        hintsBtn.setOnClickListener(new HintsLsn((MainActivity)getActivity(),word));
+//        //find the selection buttons
+//        List<Button> buttonList = new ArrayList<>();
+//        for(int i = 1; i < 14; i++){
+//            int id = getResources().getIdentifier("selection_" + i, "id")
+//            buttonList.add((Button)view.findViewById(R.id.selection_1));
+//        }
 
     }
 
-
-    private class HintsLsn implements View.OnClickListener{
-
-        MainActivity main;
-        String word;
-
-        private HintsLsn(MainActivity main, String word){
-            this.word = word;
-            this.main = main;
-        }
-
-        @Override
-        public void onClick (View v) {
-            main.replaceToHints(word);
-        }
-    }
+//
+//    private class HintsLsn implements View.OnClickListener{
+//
+//        MainActivity main;
+//        String word;
+//
+//        private HintsLsn(MainActivity main, String word){
+//            this.word = word;
+//            this.main = main;
+//        }
+//
+//        @Override
+//        public void onClick (View v) {
+//            main.replaceToHints(word);
+//        }
+//    }
 }
