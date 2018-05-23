@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "108445698940",
+    "firebase_url": "https://trendywordsusers.firebaseio.com",
+    "project_id": "trendywordsusers",
+    "storage_bucket": "trendywordsusers.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108445698940:android:44f76e57d549eb22",
+        "android_client_info": {
+          "package_name": "com.example.gilad.wordtemplate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "108445698940-f7ooe57tf0tpplam5hgd78hhoodm5l0k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gilad.wordtemplate",
+            "certificate_hash": "849849fbc9adc92e50142ef32da713ddafa2d632"
+          }
+        },
+        {
+          "client_id": "108445698940-ashrahvvcvvglps4004g6tn3emgqd6uc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAitT0It_mnzSmTWEVaG4EjfgKHHNo7N-A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "108445698940-ashrahvvcvvglps4004g6tn3emgqd6uc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

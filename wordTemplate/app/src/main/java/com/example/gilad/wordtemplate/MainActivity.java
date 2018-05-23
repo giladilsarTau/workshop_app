@@ -21,6 +21,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.gilad.wordtemplate.dummy.AchivContent;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,10 +33,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+
+
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         WordHintFragment.OnFragmentInteractionListener,
         AchivFragment.OnListFragmentInteractionListener    {
+
+    public static class User{
+        public int points;
+        public User(int points){ this.points = points;}
+        public User(){this.points = 0;}
+    }
 
     private final int numOfSelections = 14;
     private final int maxNumOfChoice = 12;
@@ -87,7 +101,36 @@ public class MainActivity extends AppCompatActivity
 
         findViewById(R.id.hintsActionButton).setOnClickListener(new HintsListener(word, hint1, hint2));
         findViewById(R.id.dailyQuestAction).setOnClickListener(new AchivListener());
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference ref = db.getReference();
 
+        ref.orderByChild("points").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                User u = dataSnapshot.getValue(User.class);
+                ((TextView)findViewById(R.id.point_amount)).setText(Integer.toString(u.points));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void initWords() {
