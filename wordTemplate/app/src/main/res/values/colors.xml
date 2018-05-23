@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="catGray">#808080</color>
+    <color name="btncolor">#3c2f2f</color>
+    <color name="text_white">#fff5ee</color>
+    <color name="choice_color">#be9b7b</color>
 </resources>

@@ -2,9 +2,13 @@ package com.example.gilad.wordtemplate;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.v4.app.FragmentManager;
+import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -17,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,17 +39,21 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 
-
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         WordHintFragment.OnFragmentInteractionListener,
-        AchivFragment.OnListFragmentInteractionListener    {
+        AchivFragment.OnListFragmentInteractionListener {
 
-    public static class User{
+    public static class User {
         public int points;
-        public User(int points){ this.points = points;}
-        public User(){this.points = 0;}
+
+        public User(int points) {
+            this.points = points;
+        }
+
+        public User() {
+            this.points = 0;
+        }
     }
 
     private final int numOfSelections = 14;
@@ -86,6 +95,7 @@ public class MainActivity extends AppCompatActivity
 
         TextView text = (TextView) findViewById(R.id.theWord);
         text.setText(word);
+        text.setTextColor(Color.WHITE);
 
         //find the selection buttons
         for (int i = 1; i <= numOfSelections; i++) {
@@ -94,6 +104,11 @@ public class MainActivity extends AppCompatActivity
             b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
             buttonList.add(b);
             b.setOnClickListener(new selectionListener(i));
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)b.getLayoutParams();
+            params.setMargins(10,10,10,10);
+            b.setLayoutParams(params);
+            b.setBackground(new ColorDrawable(getColor(R.color.btncolor)));
+            b.setTextColor(getColor(R.color.text_white));
         }
 
         applyChars();
@@ -108,12 +123,11 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 User u = dataSnapshot.getValue(User.class);
-                ((TextView)findViewById(R.id.point_amount)).setText(Integer.toString(u.points));
+                ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString(u.points));
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
@@ -131,6 +145,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+
     }
 
     public void initWords() {
@@ -179,7 +194,11 @@ public class MainActivity extends AppCompatActivity
             b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
             b.setMaxWidth(14);
             choiceList.add(b);
-
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)b.getLayoutParams();
+            params.setMargins(10,10,10,10);
+            b.setLayoutParams(params);
+            b.setBackground(new ColorDrawable(getColor(R.color.choice_color)));
+            //b.setTextColor(getColor(R.color.text_white));
         }
 
     }
@@ -270,7 +289,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class AchivListener implements View.OnClickListener{
+    private class AchivListener implements View.OnClickListener {
         FragmentManager fm;
         AchivFragment tf;
 
@@ -282,7 +301,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onClick(View v) {
-            tf.show(fm,"fragment_achievements");
+            tf.show(fm, "fragment_achievements");
         }
     }
 

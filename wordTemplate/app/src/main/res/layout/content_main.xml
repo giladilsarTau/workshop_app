@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/brown_bg"
     tools:context=".WordDisplayFragment">
 
     <LinearLayout
@@ -21,7 +22,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:text="You have:" />
+            android:text="You have:"
+            android:textColor="@android:color/background_light" />
 
         <TextView
             android:id="@+id/point_amount"
@@ -30,6 +32,7 @@
             android:layout_weight="1"
             android:gravity="right|center"
             android:text="700"
+            android:textColor="@android:color/background_light"
             android:textSize="24sp" />
 
         <ImageView
@@ -54,20 +57,23 @@
     <TextView
         android:id="@+id/theWord"
         android:layout_width="332dp"
-        android:layout_height="98dp"
+        android:layout_height="137dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="173dp"
-        android:background="@drawable/text_box_frame"
+        android:layout_marginTop="153dp"
+        android:background="@drawable/green_board_500x500"
         android:fontFamily="serif"
+        android:gravity="center"
         android:lineSpacingExtra="14sp"
         android:text="Android"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat"
         android:textSize="48sp"
         android:typeface="serif"
-        android:visibility="visible" />
-S
+        android:visibility="visible"
+        tools:textColor="@android:color/darker_gray" />
+    S
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/hintsActionButton"
         android:layout_width="wrap_content"
@@ -86,24 +92,10 @@ S
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="50dp"
-                android:backgroundTint="@android:color/holo_red_light"
-                android:text="Give Up" />
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/choices_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="45dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -205,6 +197,7 @@ S
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@color/btncolor"
                 android:text="Button" />
 
             <Button
@@ -212,6 +205,7 @@ S
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@color/btncolor"
                 android:text="Button" />
 
             <Button
@@ -219,6 +213,7 @@ S
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@color/btncolor"
                 android:text="Button" />
 
             <Button
