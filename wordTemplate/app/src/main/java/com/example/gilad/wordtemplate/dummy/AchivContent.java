@@ -1,9 +1,24 @@
 package com.example.gilad.wordtemplate.dummy;
 
+import android.support.v4.util.TimeUtils;
+import android.util.Log;
+import android.widget.TextView;
+
+import com.example.gilad.wordtemplate.MainActivity;
+import com.example.gilad.wordtemplate.MyAchivRecyclerViewAdapter;
+import com.example.gilad.wordtemplate.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -25,11 +40,12 @@ public class AchivContent {
 
     private static final int COUNT = 10;
 
-    static {
-        // Add some sample items.
+
+    public static List<AchivItem> initItems(String userId) {
         for (int i = 1; i <= COUNT; i++) {
-            addItem(createItem(i));
+            addItem(createItem(i, userId));
         }
+        return ITEMS;
     }
 
     private static void addItem(AchivItem item) {
@@ -37,12 +53,28 @@ public class AchivContent {
         ITEM_MAP.put(item.id, item);
     }
 
-    private static AchivItem createItem(int position) {
+    private static AchivItem createItem(int position, String userID) {
         //TODO use getters from users DB
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference ref = db.getReference();
+
+        //Query query = ref.child(userID).child("achievements");
+        Query query = ref.child(userID);
+
+        GetAchivLsn l = new GetAchivLsn(position);
+        query.addListenerForSingleValueEvent(l);
+
+
+        Log.e("TAG TAG TAG", "NOW IS:  " + l.res);
+
 
         String desc = "some description about achievement " + position;
-        return new AchivItem(String.valueOf(position), "Achievement " + position, makeDetails(position)
-        ,desc, 3,10);
+        if (position == 1)
+            return new AchivItem(String.valueOf(position), "Solver", makeDetails(position)
+                    , "solve 100 words", 0, 100);
+        else
+            return new AchivItem(String.valueOf(position), "Achievement " + position, makeDetails(position)
+                    , desc, 0, 10);
     }
 
     private static String makeDetails(int position) {
@@ -62,8 +94,9 @@ public class AchivContent {
         public final String content;
         public final String description;
         public final String details;
-        public final int current;
+        public int current;
         public final int max;
+        public MyAchivRecyclerViewAdapter.AchivHolder holder = null;
 
         public AchivItem(String id, String content, String details, String description, int current, int max) {
             this.id = id;
@@ -79,4 +112,35 @@ public class AchivContent {
             return content;
         }
     }
+
+    static class GetAchivLsn implements ValueEventListener {
+
+        int res;
+        int pos;
+
+        private GetAchivLsn(int pos) {
+            this.pos = pos;
+        }
+
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            //MainActivity.Achivments ac = dataSnapshot.getValue(MainActivity.Achivments.class);
+            //res = ac.getAch("a" + pos);
+            MainActivity.User u = dataSnapshot.getValue(MainActivity.User.class);
+            res = (int) u.achievements.get("a" + pos);
+            Log.e("TAG TAG TAG", "got:  " + res);
+            ITEMS.get(pos - 1).current = res;
+            if (ITEMS.get(pos - 1).holder != null) {
+                String s = String.valueOf(res) + "/" + String.valueOf(ITEMS.get(pos -1 ).max); //TODO get max
+                ITEMS.get(pos - 1).holder.mProgText.setText(s);
+                ITEMS.get(pos - 1).holder.mProgress.setProgress(res);
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
 }

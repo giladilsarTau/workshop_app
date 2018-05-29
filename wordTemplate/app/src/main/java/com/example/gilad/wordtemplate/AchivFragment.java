@@ -26,19 +26,21 @@ public class AchivFragment extends DialogFragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+    String userId;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
+     * fragment (e.choiceViewGroup. upon screen orientation changes).
      */
     public AchivFragment() {
     }
 
-    public static AchivFragment newInstance() {
+    public static AchivFragment newInstance(String userId) {
         AchivFragment fragment = new AchivFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, 1);
         fragment.setArguments(args);
+        fragment.userId = userId;
         return fragment;
     }
 
@@ -65,7 +67,8 @@ public class AchivFragment extends DialogFragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyAchivRecyclerViewAdapter(AchivContent.ITEMS, mListener));
+
+            recyclerView.setAdapter(new MyAchivRecyclerViewAdapter(AchivContent.initItems(userId), mListener));
         }
         return view;
     }

@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
-import android.text.Layout;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -31,24 +33,35 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         WordHintFragment.OnFragmentInteractionListener,
-        AchivFragment.OnListFragmentInteractionListener {
+        AchivFragment.OnListFragmentInteractionListener,
+        CorrectFragment.OnFragmentInteractionListener,
+        DownloadCallback<String> {
 
     public static class User {
         public int points;
+        public Map<String, Integer> achievements = null;
 
-        public User(int points) {
+        public User(int points, Map<String, Integer> achievements) {
             this.points = points;
+            this.achievements = achievements;
         }
 
         public User() {
@@ -56,17 +69,33 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
     private final int numOfSelections = 14;
     private final int maxNumOfChoice = 12;
     String word;
     String translate;
     String hint1;
     String hint2;
+    private NetworkFragment mNetworkFragment;
+    private boolean mDownloading = false;
+
+    static User thisUser = null;
 
     List<Button> buttonList = new ArrayList<>();
     List<Button> choiceList = new ArrayList<>();
+    List<Button> removedBtn = new ArrayList<>();
     Map<Integer, Integer> choiceSelectMap = new HashMap<>();
     String transSoFar = "";
+    String userID = "user";
+
+    JSONArray root = null;
+    List<JSONObject> remWords = new ArrayList<>();
+
+    ViewGroup choiceViewGroup = null;
+
+    int pointsEarned = 600;
+    int penelty = 0;
+    int tries = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +119,10 @@ public class MainActivity extends AppCompatActivity
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
 
+        String url = "http://trendy-words.herokuapp.com/a4fg";
 
-        initWords();
+        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), url);
 
-        TextView text = (TextView) findViewById(R.id.theWord);
-        text.setText(word);
-        text.setTextColor(Color.WHITE);
 
         //find the selection buttons
         for (int i = 1; i <= numOfSelections; i++) {
@@ -104,30 +131,39 @@ public class MainActivity extends AppCompatActivity
             b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
             buttonList.add(b);
             b.setOnClickListener(new selectionListener(i));
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)b.getLayoutParams();
-            params.setMargins(10,10,10,10);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) b.getLayoutParams();
+            params.setMargins(10, 10, 10, 10);
             b.setLayoutParams(params);
             b.setBackground(new ColorDrawable(getColor(R.color.btncolor)));
             b.setTextColor(getColor(R.color.text_white));
         }
 
-        applyChars();
-        setChoicesBoxes();
 
-        findViewById(R.id.hintsActionButton).setOnClickListener(new HintsListener(word, hint1, hint2));
+        initWords();
+
+        TextView text = (TextView) findViewById(R.id.theWord);
+        text.setText(word);
+        text.setTextColor(Color.WHITE);
+//        applyChars();
+//        setChoicesBoxes();
+
         findViewById(R.id.dailyQuestAction).setOnClickListener(new AchivListener());
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
 
-        ref.orderByChild("points").addChildEventListener(new ChildEventListener() {
+
+        Query query = ref.child(userID);
+        query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                User u = dataSnapshot.getValue(User.class);
-                ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString(u.points));
+
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if (s != null)
+                    if (s.equals("achievements"))
+                        ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString((int) (long) dataSnapshot.getValue()));
             }
 
             @Override
@@ -145,15 +181,53 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User u = dataSnapshot.getValue(User.class);
+                if (thisUser == null)
+                    thisUser = u;
+                ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString(u.points));
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        findViewById(R.id.give_up).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initWords();
+            }
+        });
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        startDownload();
+    }
+
+    private void startDownload() {
+        if (!mDownloading && mNetworkFragment != null) {
+            // Execute the async download.
+            mNetworkFragment.startDownload();
+            mDownloading = true;
+        }
     }
 
     public void initWords() {
 
-        word = getNewWord();
-        translate = getTranslation(word);
-        hint1 = getHint1(word);
-        hint2 = getHint2(word);
+        getNewWord();
+        TextView text = (TextView) findViewById(R.id.theWord);
+        text.setText(word);
+        applyChars();
+        setChoicesBoxes();
+        findViewById(R.id.hintsActionButton).setOnClickListener(new HintsListener(word, hint1, hint2));
+        penelty = 0;
+        tries = 0;
     }
 
     @Override
@@ -175,16 +249,51 @@ public class MainActivity extends AppCompatActivity
             temp.get(randomNum).setText(String.valueOf(translate.charAt(i)));
             temp.remove(randomNum);
         }
-        for (int i = 0; i < temp.size(); i++)
-            temp.get(i).setText("X");
+        Random r = new Random();
+        for (int i = 0; i < temp.size(); i++) {
+            int uni = r.nextInt(0x05eb - 0x5d0) + 0x5d0;
+            StringBuilder builder = new StringBuilder();
+            builder.appendCodePoint(uni);
+            temp.get(i).setText(builder.toString());
+        }
 
     }
 
     public void setChoicesBoxes() {
+        transSoFar = "";
+        choiceSelectMap = new HashMap<>();
+
+        for (int i = 1; i <= numOfSelections; i++) {
+            int id = getResources().getIdentifier("selection_" + i, "id", getPackageName());
+            Button b = (Button) findViewById(id);
+            b.setVisibility(View.VISIBLE);
+            b.setClickable(true);
+        }
+
+//        for (int i = 1; i <= maxNumOfChoice; i++) {
+//            int id = getResources().getIdentifier("choice_" + i, "id", getPackageName());
+//            Button b = (Button) findViewById(id);
+//            choiceViewGroup = ((ViewGroup)b.getParent());
+//            b.setVisibility(View.VISIBLE);
+//            b.setClickable(true);
+//        }
+
+        for (Button btn : removedBtn) {
+            if (choiceViewGroup != null)
+                choiceViewGroup.addView(btn);
+        }
+        removedBtn.clear();
+
         for (int i = 0; i < maxNumOfChoice - translate.length(); i++) {
             int id = getResources().getIdentifier("choice_" + (maxNumOfChoice - i), "id", getPackageName());
             Button b = (Button) findViewById(id);
-            ((ViewGroup) b.getParent()).removeView(b);
+            removedBtn.add(b);
+            if (choiceViewGroup == null)
+                choiceViewGroup = ((ViewGroup) b.getParent());
+            choiceViewGroup.removeView(b);
+
+            //b.setVisibility(View.INVISIBLE);
+            //b.setClickable(false);
         }
         for (int i = 1; i <= translate.length(); i++) {
             int id = getResources().getIdentifier("choice_" + i, "id", getPackageName());
@@ -194,8 +303,8 @@ public class MainActivity extends AppCompatActivity
             b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
             b.setMaxWidth(14);
             choiceList.add(b);
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)b.getLayoutParams();
-            params.setMargins(10,10,10,10);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) b.getLayoutParams();
+            params.setMargins(10, 10, 10, 10);
             b.setLayoutParams(params);
             b.setBackground(new ColorDrawable(getColor(R.color.choice_color)));
             //b.setTextColor(getColor(R.color.text_white));
@@ -229,14 +338,35 @@ public class MainActivity extends AppCompatActivity
                 btn.setClickable(false);
                 btn.setVisibility(View.INVISIBLE);
                 transSoFar = transSoFar + btn.getText();
-
+                tries++;
+                if (tries == translate.length() + 4 && penelty < 500) {
+                    tries = 0;
+                    penelty += 50;
+                }
                 if (transSoFar.equals(translate)) {
-                    Context c = getApplicationContext();
-                    CharSequence texrt = "HORRAY!";
-                    int duration = Toast.LENGTH_SHORT;
+//                    Context c = getApplicationContext();
+//                    CharSequence texrt = "HORRAY!";
+//                    int duration = Toast.LENGTH_SHORT;
+//
+//                    Toast toast = Toast.makeText(c, texrt, duration);
+//                    toast.show();
+                    FirebaseDatabase db = FirebaseDatabase.getInstance();
+                    DatabaseReference ref = db.getReference();
 
-                    Toast toast = Toast.makeText(c, texrt, duration);
-                    toast.show();
+                    thisUser.points += (pointsEarned - penelty);
+                    thisUser.achievements.put("a1", thisUser.achievements.get("a1") + 1);
+
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("points", thisUser.points);
+                    update.put("achievements/a1", thisUser.achievements.get("a1"));
+
+                    ref.child(userID).updateChildren(update);
+
+                    FragmentManager fm = getSupportFragmentManager();
+                    CorrectFragment cf = CorrectFragment.newInstance(pointsEarned - penelty);
+
+                    cf.show(fm, "fragment_correct_name");
+                    initWords();
                 }
             }
         }
@@ -296,7 +426,7 @@ public class MainActivity extends AppCompatActivity
         //user id?
         private AchivListener() {
             this.fm = getSupportFragmentManager();
-            this.tf = AchivFragment.newInstance();
+            this.tf = AchivFragment.newInstance(userID);
         }
 
         @Override
@@ -333,23 +463,63 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public String getNewWord() {
-        //TODO implement this
-        return "house";
+    public void getNewWord() {
+        if (root == null) {
+            word = "house";
+            translate = "בית";
+            hint1 = "bla bla";
+            hint2 = "bla bla bla bla bla";
+        } else {
+            try {
+                JSONObject wordJson = remWords.get(0);
+                word = wordJson.getString("word");
+                this.translate = wordJson.getString("translation").replaceAll(
+                        "[\\u0591-\\u05c7]", ""
+                );
+                hint1 = wordJson.getString("sentence");
+                hint2 = wordJson.getString("definition");
+                remWords.remove(0);
+            } catch (Exception e) {
+                Log.e("TAG TAG", e.getMessage());
+            }
+        }
+        Log.e("TAG TAG", "word is: " + word);
+        Log.e("TAG TAG", "trans is: " + translate);
+
     }
 
-    public String getTranslation(String word) {
-        //TODO
-        return "בית";
+
+    @Override
+    public void updateFromDownload(String result) {
+        try {
+            root = new JSONArray(result);
+            for (int i = 0; i < root.length(); i++)
+                remWords.add((JSONObject) root.get(i));
+            Collections.shuffle(remWords);
+        } catch (Exception e) {
+            Log.e("BAD ERROR", e.getMessage());
+        }
     }
 
-    public String getHint1(String word) {
-        //TODO implement this
-        return "bla bla bla bla bla";
+    @Override
+    public NetworkInfo getActiveNetworkInfo() {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo;
     }
 
-    public String getHint2(String word) {
-        //TODO implement this
-        return "test test test test test test test test test test test test test test";
+    @Override
+    public void onProgressUpdate(int progressCode, int percentComplete) {
+
+    }
+
+    @Override
+    public void finishDownloading() {
+        mDownloading = false;
+        if (mNetworkFragment != null) {
+            mNetworkFragment.cancelDownload();
+        }
+
     }
 }

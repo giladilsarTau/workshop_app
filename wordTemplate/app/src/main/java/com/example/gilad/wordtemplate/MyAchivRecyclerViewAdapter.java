@@ -39,6 +39,7 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
     public void onBindViewHolder(final AchivHolder holder, int position) {
         AchivItem item = mValues.get(position);
         holder.mItem = item;
+        holder.mItem.holder = holder;
         holder.mContentView.setText(item.content);
 
         holder.mProgress.setMax(item.max);

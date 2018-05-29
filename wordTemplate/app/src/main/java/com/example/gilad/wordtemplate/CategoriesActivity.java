@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 
 public class CategoriesActivity extends AppCompatActivity {
@@ -53,6 +54,13 @@ public class CategoriesActivity extends AppCompatActivity {
         cat4.setOnClickListener(new CatBtnLis(4));
         cat5.setOnClickListener(new CatBtnLis(5));
         cat6.setOnClickListener(new CatBtnLis(6));
+
+        for(int i = 1; i <= 6 ; i++){
+            int id = getResources().getIdentifier("imageViewCat" + i,
+                    "id", getPackageName());
+            ImageButton btn = (ImageButton) findViewById(id);
+            btn.setBackground(new ColorDrawable(getColor(R.color.catGray)));
+        }
 
     }
 

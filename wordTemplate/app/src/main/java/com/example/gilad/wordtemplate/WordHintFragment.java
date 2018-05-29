@@ -11,11 +11,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class WordHintFragment extends DialogFragment {
     // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    // the fragment initialization parameters, e.choiceViewGroup. ARG_ITEM_NUMBER
     private static String WORD = "param1";
     private static String HINT_1 = "param2";
     private static String HINT_2 = "param3";
@@ -76,7 +81,6 @@ public class WordHintFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 getDialog().dismiss();
-                //TODO new word
             }
         });
 
@@ -92,17 +96,30 @@ public class WordHintFragment extends DialogFragment {
         hintBtn = view.findViewById(R.id.next_hint);
 
         hintBtn.setOnClickListener(new View.OnClickListener() {
+            FirebaseDatabase db = FirebaseDatabase.getInstance();
+            DatabaseReference ref = db.getReference();
+
             @Override
             public void onClick(View v) {
-                if(!isHint1) {
+                if(!isHint1 && MainActivity.thisUser.points >= 200) {
                     hint1.setVisibility(View.VISIBLE);
                     isHint1 = true;
-                    //TODO reduce score
+
+                    Map<String, Object> update = new HashMap<>();
+                    MainActivity.thisUser.points -= 300;
+                    update.put("points", MainActivity.thisUser.points);
+                    ref.child("user").updateChildren(update);
+
                 }
-                else if(!isHint2){
+                else if(!isHint2 && MainActivity.thisUser.points >= 200){
                     hint2.setVisibility(View.VISIBLE);
                     isHint2 = true;
-                    //TODO reduce score
+
+                    Map<String, Object> update = new HashMap<>();
+                    MainActivity.thisUser.points -= 300;
+                    update.put("points", MainActivity.thisUser.points);
+                    ref.child("user").updateChildren(update);
+
                     ((ViewGroup)v.getParent()).removeView(v);
                 }
             }

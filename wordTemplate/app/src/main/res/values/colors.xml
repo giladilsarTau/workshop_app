@@ -7,4 +7,5 @@
     <color name="btncolor">#3c2f2f</color>
     <color name="text_white">#fff5ee</color>
     <color name="choice_color">#be9b7b</color>
+    <color name="correctBtn">#f52e98</color>
 </resources>

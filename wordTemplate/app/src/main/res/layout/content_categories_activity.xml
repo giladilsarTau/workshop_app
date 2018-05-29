@@ -1,120 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".CategoriesActivity"
     tools:showIn="@layout/categories_activity">
 
-    <ImageButton
-        android:id="@+id/imageViewCat1"
-        style="@android:style/Widget.Holo.Light.ImageButton"
-        android:layout_width="115dp"
-        android:layout_height="113dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginTop="44dp"
-        android:background="@color/catGray"
-        android:contentDescription="cat2"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/entertaiment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <ImageButton
-        android:id="@+id/imageViewCat3"
-        style="@android:style/Widget.Holo.Light.ImageButton"
-        android:layout_width="115dp"
-        android:layout_height="113dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        android:background="@color/catGray"
-        android:contentDescription="cat3"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/sports"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="90dp"
+            android:orientation="vertical">
 
-    <ImageButton
-        android:id="@+id/imageViewCat4"
-        style="@android:style/Widget.Holo.Light.ImageButton"
-        android:layout_width="115dp"
-        android:layout_height="113dp"
-        android:layout_marginBottom="40dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="40dp"
-        android:background="@color/catGray"
-        android:contentDescription="cat3"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/technology"
-        app:layout_constraintBottom_toTopOf="@+id/imageViewCat6"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.759"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewCat2" />
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Health"
+                android:textSize="18sp" />
 
-    <ImageButton
-        android:id="@+id/imageViewCat6"
-        style="@android:style/Widget.Holo.Light.ImageButton"
-        android:layout_width="115dp"
-        android:layout_height="113dp"
-        android:layout_marginBottom="44dp"
-        android:layout_marginEnd="72dp"
-        android:layout_marginStart="32dp"
-        android:background="@color/catGray"
-        android:contentDescription="cat5"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/health"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageViewCat5"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+            <ImageButton
+                android:id="@+id/imageViewCat5"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/health" />
+        </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/imageViewCat5"
-        android:layout_width="115dp"
-        android:layout_height="113dp"
-        android:layout_marginBottom="44dp"
-        android:layout_marginEnd="64dp"
-        android:background="@color/catGray"
-        android:contentDescription="cat6"
-        android:cropToPadding="false"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/politics"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <ImageButton
-        android:id="@+id/imageViewCat2"
-        style="@android:style/Widget.Holo.Light.ImageButton"
-        android:layout_width="115dp"
-        android:layout_height="113dp"
-        android:layout_marginEnd="72dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="44dp"
-        android:background="@color/catGray"
-        android:contentDescription="cat1"
-        android:padding="5dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:paddingTop="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/economy"
-        app:layout_constraintEnd_toStartOf="@+id/imageViewCat1"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</android.support.constraint.ConstraintLayout>
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="News"
+                android:textSize="18sp" />
+
+            <ImageButton
+                android:id="@+id/imageViewCat6"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/politics" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="90dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Economy"
+                android:textSize="18sp" />
+
+            <ImageButton
+                android:id="@+id/imageViewCat1"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/economy" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Entertaiment"
+                android:textSize="18sp" />
+
+            <ImageButton
+                android:id="@+id/imageViewCat2"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/entertaiment" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="90dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Technology"
+                android:textSize="18sp" />
+
+            <ImageButton
+                android:id="@+id/imageViewCat3"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/technology" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sports"
+                android:textSize="18sp" />
+
+            <ImageButton
+                android:id="@+id/imageViewCat4"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/sports" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

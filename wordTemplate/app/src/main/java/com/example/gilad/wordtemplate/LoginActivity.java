@@ -34,7 +34,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -72,15 +74,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
 
 
-    Button signin = findViewById(R.id.sign_in_button_google);
-    signin.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick(View v) {
+        Button signin = findViewById(R.id.sign_in_button_google);
+        signin.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-        }
-    });
+                FirebaseDatabase db = FirebaseDatabase.getInstance();
+                DatabaseReference ref = db.getReference();
+
+//            Map<String, Object> achievements = new HashMap<>();
+//            for(int i = 1 ; i <= 10; i++ )
+//                achievements.put("achievements/a" + i, 3);
+//
+//            ref.child("user").updateChildren(achievements);
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 

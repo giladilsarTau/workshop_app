@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:background="#773986"
     tools:context=".WordHintFragment">
 
     <LinearLayout
@@ -24,6 +25,7 @@
                 android:layout_marginBottom="25dp"
                 android:text="Word"
                 android:textAlignment="center"
+                android:textColor="@android:color/white"
                 android:textSize="24sp" />
 
             <TextView
@@ -33,6 +35,7 @@
                 android:paddingLeft="25dp"
                 android:paddingRight="25dp"
                 android:text="@string/example_text_placeholder"
+                android:textColor="@color/text_white"
                 android:textSize="20sp" />
 
             <TextView
@@ -43,6 +46,7 @@
                 android:paddingRight="25dp"
                 android:paddingTop="30dp"
                 android:text="@string/long_place_golder"
+                android:textColor="@color/text_white"
                 android:textSize="20sp" />
         </LinearLayout>
 
