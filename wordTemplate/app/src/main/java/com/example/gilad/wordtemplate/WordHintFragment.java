@@ -106,7 +106,7 @@ public class WordHintFragment extends DialogFragment {
                     isHint1 = true;
 
                     Map<String, Object> update = new HashMap<>();
-                    MainActivity.thisUser.points -= 300;
+                    MainActivity.thisUser.points -= 200;
                     update.put("points", MainActivity.thisUser.points);
                     ref.child("user").updateChildren(update);
 
@@ -116,7 +116,7 @@ public class WordHintFragment extends DialogFragment {
                     isHint2 = true;
 
                     Map<String, Object> update = new HashMap<>();
-                    MainActivity.thisUser.points -= 300;
+                    MainActivity.thisUser.points -= 200;
                     update.put("points", MainActivity.thisUser.points);
                     ref.child("user").updateChildren(update);
 
