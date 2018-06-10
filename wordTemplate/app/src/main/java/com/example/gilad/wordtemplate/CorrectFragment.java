@@ -16,16 +16,16 @@ public class CorrectFragment extends DialogFragment {
     private static int SCORE = 0;
 
     private OnFragmentInteractionListener mListener;
-
+    private MainActivity father;
 
     public CorrectFragment(){}
 
-    public static CorrectFragment newInstance(int param1) {
+    public static CorrectFragment newInstance(int param1, MainActivity father) {
         CorrectFragment fragment = new CorrectFragment();
         Bundle args = new Bundle();
         args.putInt("SCORE", param1);
         fragment.setArguments(args);
-
+        fragment.father = father;
         CorrectFragment.SCORE = param1;
 
         return fragment;
@@ -41,6 +41,7 @@ public class CorrectFragment extends DialogFragment {
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                father.initWords();
                 getDialog().dismiss();
             }
         });

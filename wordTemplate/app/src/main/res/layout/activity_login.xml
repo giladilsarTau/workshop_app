@@ -25,13 +25,12 @@
             android:textAlignment="center"
             android:textSize="58sp" />
 
-        <Button
+        <com.google.android.gms.common.SignInButton
             android:id="@+id/sign_in_button_google"
             android:layout_width="348dp"
             android:layout_height="47dp"
             android:layout_marginBottom="114dp"
             android:layout_marginTop="60dp"
-            android:text="Sign In"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3"
             tools:layout_editor_absoluteX="2dp" />

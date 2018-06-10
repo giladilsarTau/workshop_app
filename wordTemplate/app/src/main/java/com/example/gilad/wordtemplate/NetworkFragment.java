@@ -17,37 +17,42 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
 
 public class NetworkFragment extends Fragment {
     public static final String TAG = "NetworkFragment";
-    private static final String URL_KEY = "UrlKey";
+    private static String URL_KEY = "UrlKey";
 
     private DownloadCallback mCallback;
     private DownloadTask mDownloadTask;
     private String mUrlString;
 
-    public static NetworkFragment getInstance(FragmentManager fragmentManager, String url) {
+    public static NetworkFragment getInstance(FragmentManager fragmentManager, String url, DownloadCallback callback) {
         NetworkFragment networkFragment = new NetworkFragment();
+
         Bundle args = new Bundle();
-        args.putString(URL_KEY, url);
         networkFragment.setArguments(args);
         fragmentManager.beginTransaction().add(networkFragment, TAG).commit();
+        networkFragment.mCallback = callback;
+
+        networkFragment.mUrlString = url;
         return networkFragment;
     }
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mUrlString = getArguments().getString(URL_KEY);
-    }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        // Host Activity will handle callbacks from task.
-        mCallback = (DownloadCallback) context;
+//    @Override
+//    public void onCreate(@Nullable Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        mUrlString = getArguments().getString(URL_KEY);
+//    }
 
-    }
+//    @Override
+//    public void onAttach(Context context) {
+//        super.onAttach(context);
+//        // Host Activity will handle callbacks from task.
+//        mCallback = (DownloadCallback) context;
+//
+//    }
 
     @Override
     public void onDetach() {
@@ -67,7 +72,6 @@ public class NetworkFragment extends Fragment {
      * Start non-blocking execution of DownloadTask.
      */
     public void startDownload() {
-        Log.e(TAG, "starting to download");
         cancelDownload();
         mDownloadTask = new DownloadTask(mCallback);
         mDownloadTask.execute(mUrlString);
@@ -81,7 +85,6 @@ public class NetworkFragment extends Fragment {
             mDownloadTask.cancel(true);
         }
     }
-
 
 
     /**
@@ -107,9 +110,11 @@ public class NetworkFragment extends Fragment {
         class Result {
             public String mResultValue;
             public Exception mException;
+
             public Result(String resultValue) {
                 mResultValue = resultValue;
             }
+
             public Result(Exception exception) {
                 mException = exception;
             }
@@ -141,17 +146,22 @@ public class NetworkFragment extends Fragment {
             Log.e(TAG, "in background");
 
             Result result = null;
+
             if (!isCancelled() && urls != null && urls.length > 0) {
+
+
                 String urlString = urls[0];
                 try {
+
                     URL url = new URL(urlString);
+
                     String resultString = downloadUrl(url);
                     if (resultString != null) {
                         result = new Result(resultString);
                     } else {
                         throw new IOException("No response received.");
                     }
-                } catch(Exception e) {
+                } catch (Exception e) {
                     result = new Result(e);
                 }
             }
