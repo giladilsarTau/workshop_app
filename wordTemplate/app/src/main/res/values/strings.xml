@@ -26,7 +26,14 @@
     <string name="long_description_holder">Some very, very long description about the word, maybe from an article with test bla bla bla bla bla</string>
 
 
-
     <string name="categories_label">Categories</string>
     <string name="long_place_golder">With over a million apps and games, Google Play has something for everyone. Browse and install your favorite Android apps and games on your Android phone, tablet, TV or from the Web.</string>
+    <string name="title_activity_stats">statsActivity</string>
+    
+    
+    <string-array name="stats_array">
+        <item>Total Words</item>
+        <item>Words per day</item>
+
+    </string-array>
 </resources>

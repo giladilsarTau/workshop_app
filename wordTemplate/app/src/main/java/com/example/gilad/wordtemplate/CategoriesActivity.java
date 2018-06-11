@@ -87,7 +87,7 @@ public class CategoriesActivity extends AppCompatActivity {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                MainActivity.User u = dataSnapshot.getValue(MainActivity.User.class);
+                UserClass u = dataSnapshot.getValue(UserClass.class);
 
 
                 catMap.putAll(u.categories);
@@ -164,12 +164,12 @@ public class CategoriesActivity extends AppCompatActivity {
 
 
     public enum CategoryEnum {
-        HEALTH(5, "Health"),
-        NEWS(6, "News"),
-        ECONOMY(1, "Economy"),
-        ENTERTAINMENT(2, "Entertainment"),
-        TECHNOLOGY(3, "Technology"),
-        SPORTS(4, "Sports");
+        HEALTH(5, "HEALTH"),
+        NEWS(6, "NEWS"),
+        ECONOMY(1, "ECONOMY"),
+        ENTERTAINMENT(2, "ENTERTAINMENT"),
+        TECHNOLOGY(3, "TECHNOLOGY"),
+        SPORTS(4, "SPORTS");
 
 
         public final int index;

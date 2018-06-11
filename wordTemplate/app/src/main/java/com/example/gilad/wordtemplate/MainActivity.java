@@ -7,13 +7,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -25,22 +22,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.gilad.wordtemplate.dummy.AchivContent;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,17 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,24 +63,6 @@ public class MainActivity extends AppCompatActivity
         CorrectFragment.OnFragmentInteractionListener,
         DownloadCallback<String> {
 
-    public static class User {
-        public Map<String, Integer> achievements = null;
-        public int points;
-        public String trendyId;
-        public String difficulty;
-        public Map<String, Integer> categories = null;
-
-        public User(int points, Map<String, Integer> achievements, Map<String, Integer> cats) {
-            this.points = points;
-            this.achievements = achievements;
-            this.categories = cats;
-        }
-
-        public User() {
-            this.points = 0;
-        }
-    }
-
 
     private final int numOfSelections = 14;
     private final int maxNumOfChoice = 12;
@@ -107,7 +73,7 @@ public class MainActivity extends AppCompatActivity
     private NetworkFragment mNetworkFragment;
     private boolean mDownloading = false;
 
-    static User thisUser = null;
+    static UserClass thisUser = null;
 
     List<Button> buttonList = new ArrayList<>();
     List<Button> choiceList = new ArrayList<>();
@@ -116,9 +82,11 @@ public class MainActivity extends AppCompatActivity
     String transSoFar = "";
     String userID = "user";
 
-    JSONArray root = null;
-    List<JSONObject> remWords = new ArrayList<>();
-    JSONObject currJsonWord = null;
+    String currentWordCategory;
+
+    static JSONArray root = null;
+    static List<JSONObject> remWords = new ArrayList<>();
+    static JSONObject currJsonWord = null;
 
 
     ViewGroup choiceViewGroup = null;
@@ -159,13 +127,6 @@ public class MainActivity extends AppCompatActivity
         View header = navigationView.getHeaderView(0);
         ((TextView) header.findViewById(R.id.navMail)).setText(account.getEmail());
         ((TextView) header.findViewById(R.id.navName)).setText(account.getDisplayName());
-
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-
 
         //find the selection buttons
         for (int i = 1; i <= numOfSelections; i++) {
@@ -225,7 +186,7 @@ public class MainActivity extends AppCompatActivity
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User u = dataSnapshot.getValue(User.class);
+                UserClass u = dataSnapshot.getValue(UserClass.class);
                 if (thisUser == null)
                     thisUser = u;
                 ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString(u.points));
@@ -250,16 +211,21 @@ public class MainActivity extends AppCompatActivity
         findViewById(R.id.give_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final HashMap<String, String> map = new HashMap<>();
+                map.put("word", word);
+                map.put("knowledge", "NO_ANSWER");
+
+                JSONObject object = new JSONObject(map);
+                JSONArray arr = new JSONArray();
+                arr.put(object);
+
+                postToServer(arr);
+
                 initWords();
+
             }
         });
     }
-
-//    @Override
-//    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-//        super.onPostCreate(savedInstanceState);
-//        startDownload();
-//    }
 
     private void startDownload() {
         if (!mDownloading && mNetworkFragment != null) {
@@ -402,6 +368,7 @@ public class MainActivity extends AppCompatActivity
                     seenWord.put("word", word);
                     seenWord.put("translate", translate);
                     seenWord.put("time", Calendar.getInstance().getTime().getTime());
+                    seenWord.put("category", currentWordCategory);
 
                     try {
                         if (!currJsonWord.getString("level").equals("null")) {
@@ -420,7 +387,6 @@ public class MainActivity extends AppCompatActivity
                     FragmentManager fm = getSupportFragmentManager();
                     CorrectFragment cf = CorrectFragment.newInstance(pointsEarned - penelty, selfPointer);
 
-                    String postUrl = "http://trendy-words.herokuapp.com/" + userID;
                     final HashMap<String, String> map = new HashMap<>();
                     map.put("word", word);
                     map.put("knowledge", "CORRECT_ANSWER");
@@ -429,30 +395,37 @@ public class MainActivity extends AppCompatActivity
                     JSONArray arr = new JSONArray();
                     arr.put(object);
 
-                    Log.e("TTTT"," array is " + arr.toString());
-                    JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.POST, postUrl,arr,
-                            new Response.Listener<JSONArray>() {
-                                @Override
-                                public void onResponse(JSONArray response) {
-                                    Log.e("TTTT", "response is : " + response.toString());
+                    postToServer(arr);
 
-                                }
-                            },
-                            new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Log.e("TTTT", "error is: " + error.toString());
-                                }
-                            }
-                    ){
-                        //here I want to post data to sever
-                    };
-
-                    myRequestQueue.add(jsonobj);
                     cf.show(fm, "fragment_correct_name");
                 }
             }
         }
+    }
+
+    private void postToServer(JSONArray arr) {
+        String postUrl = "http://trendy-words.herokuapp.com/" + userID;
+
+        JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.POST, postUrl, arr,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Log.e("TTTT", "response is : " + response.toString());
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("TTTT", "error is: " + error.toString());
+                    }
+                }
+        ) {
+            //here I want to post data to sever
+        };
+
+        myRequestQueue.add(jsonobj);
+
     }
 
     private class choiceListener implements View.OnClickListener {
@@ -525,7 +498,12 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
 
-        if (id == R.id.nav_settings) {
+        if (id == R.id.nav_stats) {
+            //go stats
+            Intent intent = new Intent(this, statsActivity.class);
+            intent.putExtra("account", account);
+            startActivity(intent);
+
 
         } else if (id == R.id.nav_cats) {
             //go to categories
@@ -533,8 +511,17 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra("ID", account.getId());
             startActivity(intent);
 
-
+        } else if (id == R.id.logout) {
+            LoginActivity.mGoogleSignInClient.signOut()
+                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Intent intent = new Intent(selfPointer, LoginActivity.class);
+                            startActivity(intent);
+                        }
+                    });
         }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -562,7 +549,10 @@ public class MainActivity extends AppCompatActivity
                 );
                 hint1 = currJsonWord.getString("sentence");
                 hint2 = currJsonWord.getString("definition");
+                currentWordCategory = currJsonWord.getJSONArray("categories").getString(0);
 
+                if (currentWordCategory.equals("CS") || currentWordCategory.equals("PROGRAMMING"))
+                    currentWordCategory = "TECHNOLOGY";
 
                 remWords.remove(0);
             } catch (Exception e) {

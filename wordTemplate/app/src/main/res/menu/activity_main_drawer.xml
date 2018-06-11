@@ -11,9 +11,9 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Categories" />
         <item
-            android:id="@+id/nav_settings"
+            android:id="@+id/nav_stats"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Settings" />
+            android:title="Statistics" />
 
     </group>
     <group

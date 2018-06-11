@@ -1,12 +1,10 @@
 package com.example.gilad.wordtemplate.dummy;
 
-import android.support.v4.util.TimeUtils;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.example.gilad.wordtemplate.MainActivity;
 import com.example.gilad.wordtemplate.MyAchivRecyclerViewAdapter;
-import com.example.gilad.wordtemplate.R;
+import com.example.gilad.wordtemplate.UserClass;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -18,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -126,7 +123,7 @@ public class AchivContent {
         public void onDataChange(DataSnapshot dataSnapshot) {
             //MainActivity.Achivments ac = dataSnapshot.getValue(MainActivity.Achivments.class);
             //res = ac.getAch("a" + pos);
-            MainActivity.User u = dataSnapshot.getValue(MainActivity.User.class);
+            UserClass u = dataSnapshot.getValue(UserClass.class);
             res = (int) u.achievements.get("a" + pos);
             Log.e("TAG TAG TAG", "got:  " + res);
             ITEMS.get(pos - 1).current = res;

@@ -42,8 +42,12 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,8 +73,13 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
     List<AuthUI.IdpConfig> providers = Arrays.asList(
             new AuthUI.IdpConfig.EmailBuilder().build(),
             new AuthUI.IdpConfig.GoogleBuilder().build());
-    GoogleSignInClient mGoogleSignInClient;
+    static GoogleSignInClient mGoogleSignInClient = null;
     GoogleSignInOptions gso;
+
+
+    FirebaseDatabase db = FirebaseDatabase.getInstance();
+    DatabaseReference ref = db.getReference();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,15 +105,6 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         super.onStart();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
-            FirebaseDatabase db = FirebaseDatabase.getInstance();
-            DatabaseReference ref = db.getReference();
-//
-//            Map<String, Object>map = new HashMap<>();
-//            map.put("points",1000);
-//            for(int i = 1; i <= 10; i++)
-//                map.put("achievements/a" + i, 0);
-//
-//            ref.child(account.getId()).updateChildren(map);
 
             updateUI(account);
         }
@@ -126,23 +126,23 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            final GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
-            FirebaseDatabase db = FirebaseDatabase.getInstance();
-            DatabaseReference ref = db.getReference();
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("points", 1000);
-            for (int i = 1; i <= 10; i++)
-                map.put("achievements/a" + i, 0);
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (!dataSnapshot.hasChild(account.getId())) {
+                        createNewUser(account.getId());
+                    }
 
-            try {
-                String newRef = downloadUrl(new URL("http://trendy-words.herokuapp.com/newUser?level=BEGINNER"));
-                map.put("trendyId", newRef);
-                map.put("difficulty", "BEGINNER");
-            } catch (Exception e){}
-            ref.child(account.getId()).updateChildren(map);
+                }
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
 
             // Signed in successfully, show authenticated UI.
             updateUI(account);
@@ -155,11 +155,30 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         }
     }
 
+    private void createNewUser(String id) {
+        Map<String, Object> map = new HashMap<>();
+
+        try {
+            String newRef = downloadUrl(new URL("http://trendy-words.herokuapp.com/newUser?level=BEGINNER"));
+            map.put("trendyId", newRef);
+            map.put("difficulty", "BEGINNER");
+        } catch (Exception e) {
+        }
+
+        map.put("points", 1000);
+        for (int i = 1; i <= 10; i++)
+            map.put("achievements/a" + i, 0);
+
+        for (int i = 1; i <= 6; i++)
+            map.put("categories/" + CategoriesActivity.CategoryEnum.getCatFromIndex(i).name, 0);
+
+        ref.child(id).updateChildren(map);
+    }
+
     private void updateUI(GoogleSignInAccount account) {
-        String id = account.getIdToken();
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.putExtra("GoogleAccount", account);
-        startActivity(intent); //TODO send token
+        startActivity(intent);
     }
 
 
