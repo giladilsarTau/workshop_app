@@ -12,8 +12,12 @@
             android:title="Categories" />
         <item
             android:id="@+id/nav_stats"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/statistics"
             android:title="Statistics" />
+        <item
+            android:id="@+id/nav_achiv"
+            android:icon="@drawable/trophy3"
+            android:title="Achievements" />
 
     </group>
     <group

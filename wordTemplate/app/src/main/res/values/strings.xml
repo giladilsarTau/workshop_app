@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">wordTemplate</string>
+    <string name="app_name">trendyWords</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Motty</string>
@@ -9,6 +9,11 @@
     <string name="example_text_placeholder">"a space station run by androids"</string>
     <string name="title_activity_login">Sign in</string>
     <string name="welcome_place_holder">Welcome to the Trendy Words</string>
+
+
+    <string name="facebook_app_id">208470126635317</string>
+    <string name="fb_login_protocol_scheme">fb208470126635317</string>
+
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -29,11 +34,14 @@
     <string name="categories_label">Categories</string>
     <string name="long_place_golder">With over a million apps and games, Google Play has something for everyone. Browse and install your favorite Android apps and games on your Android phone, tablet, TV or from the Web.</string>
     <string name="title_activity_stats">statsActivity</string>
-    
-    
+
+
     <string-array name="stats_array">
         <item>Total Words</item>
         <item>Words per day</item>
 
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

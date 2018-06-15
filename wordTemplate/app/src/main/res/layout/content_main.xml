@@ -44,16 +44,6 @@
 
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/dailyQuestAction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/theWord"
-        android:layout_marginBottom="20dp"
-        android:clickable="true"
-        android:src="@drawable/trophy2" />
-
     <TextView
         android:id="@+id/theWord"
         android:layout_width="332dp"
@@ -74,14 +64,25 @@
         tools:textColor="@android:color/darker_gray" />
     S
 
+    <ImageView
+        android:id="@+id/textToVoiceBtn"
+        android:layout_width="35dp"
+        android:layout_height="41dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="198dp"
+        android:clickable="true"
+        android:src="@drawable/loud" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/hintsActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/dailyQuestAction"
+        android:layout_below="@+id/theWord"
         android:clickable="true"
-        android:src="@android:drawable/ic_menu_help" />
+        android:src="@android:drawable/ic_menu_help"
+        app:fabSize="mini" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/give_up"
@@ -90,8 +91,11 @@
         android:layout_below="@+id/theWord"
         android:layout_marginBottom="20dp"
         android:clickable="true"
-        android:src="@android:drawable/ic_delete"
-        app:backgroundTint="@android:color/darker_gray" />
+        android:saveEnabled="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/whiteflag"
+        app:backgroundTint="@android:color/darker_gray"
+        app:fabSize="mini" />
 
     <LinearLayout
         android:layout_width="match_parent"

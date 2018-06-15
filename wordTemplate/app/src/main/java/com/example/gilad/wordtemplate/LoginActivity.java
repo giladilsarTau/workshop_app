@@ -31,6 +31,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -48,6 +55,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,11 +89,13 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
     FirebaseDatabase db = FirebaseDatabase.getInstance();
     DatabaseReference ref = db.getReference();
 
+    RequestQueue myRequestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        myRequestQueue = Volley.newRequestQueue(this);
 
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -133,7 +144,10 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (!dataSnapshot.hasChild(account.getId())) {
-                        createNewUser(account.getId());
+                        //createNewUser(account.getId());
+                        postToServer(account.getId(), account);
+                    } else{
+                        updateUI(account);
                     }
 
                 }
@@ -145,7 +159,6 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
             });
 
             // Signed in successfully, show authenticated UI.
-            updateUI(account);
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
@@ -209,7 +222,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
             // Timeout for connection.connect() arbitrarily set to 3000ms.
             connection.setConnectTimeout(20000);
             // For this use case, set HTTP method to GET.
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("POST");
             // Already true by default but setting just in case; needs to be true since this request
             // is carrying an input (response) body.
             connection.setDoInput(true);
@@ -252,6 +265,52 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
             maxReadSize -= readSize;
         }
         return buffer.toString();
+    }
+
+    private void postToServer(final String myId, final GoogleSignInAccount account) {
+        String postUrl = "http://trendy-words.herokuapp.com/newUser?level=BEGINNER";
+
+
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,postUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.e("TTTT", "response is : " + response.toString());
+
+
+
+                Map<String, Object> map = new HashMap<>();
+
+                try {
+
+                    map.put("trendyId", response);
+                    map.put("difficulty", "BEGINNER");
+                } catch (Exception e) {
+                }
+
+                map.put("points", 1000);
+                for (int i = 1; i <= 10; i++)
+                    map.put("achievements/a" + i, 0);
+
+                for (int i = 1; i <= 6; i++)
+                    map.put("categories/" + CategoriesActivity.CategoryEnum.getCatFromIndex(i).name, 0);
+
+                ref.child(myId).updateChildren(map);
+                updateUI(account);
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("TTTT", "error is: " + error.toString());
+
+            }
+        });
+
+
+        myRequestQueue.add(stringRequest);
+
     }
 }
 

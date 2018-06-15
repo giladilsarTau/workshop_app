@@ -2,14 +2,20 @@ package com.example.gilad.wordtemplate;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -32,6 +38,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.gilad.wordtemplate.dummy.AchivContent;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -46,21 +58,28 @@ import com.google.firebase.database.ValueEventListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         WordHintFragment.OnFragmentInteractionListener,
         AchivFragment.OnListFragmentInteractionListener,
         CorrectFragment.OnFragmentInteractionListener,
+        AchivCompleteFrag.OnFragmentInteractionListener,
         DownloadCallback<String> {
 
 
@@ -88,11 +107,11 @@ public class MainActivity extends AppCompatActivity
     static List<JSONObject> remWords = new ArrayList<>();
     static JSONObject currJsonWord = null;
 
-
+    TextToSpeech t1;
     ViewGroup choiceViewGroup = null;
 
     int pointsEarned = 600;
-    int penelty = 0;
+    int penalty = 0;
     int tries = 0;
 
     DownloadCallback mcall;
@@ -101,6 +120,11 @@ public class MainActivity extends AppCompatActivity
     static GoogleSignInAccount account = null;
     RequestQueue myRequestQueue;
 
+
+    public static Map<String, Integer> maxAchivMap = null;
+    CallbackManager callbackManager;
+    ShareDialog shareDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +132,7 @@ public class MainActivity extends AppCompatActivity
         selfPointer = this;
         if (account == null)
             account = getIntent().getParcelableExtra("GoogleAccount");
-
+        initAchivMap();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -149,7 +173,6 @@ public class MainActivity extends AppCompatActivity
         text.setText(word);
         text.setTextColor(Color.WHITE);
 
-        findViewById(R.id.dailyQuestAction).setOnClickListener(new AchivListener());
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
 
@@ -193,8 +216,8 @@ public class MainActivity extends AppCompatActivity
                 userID = u.trendyId;
 
                 if (root == null) {
-                    String url = "http://trendy-words.herokuapp.com/" + userID + "?category=ANY&level=" + u.difficulty;
-                    Log.e("TRENDY WORDS", "starting to downlaod form: " + url);
+                    String url = "http://trendy-words.herokuapp.com/" + userID;
+                    Log.e("TRENDY WORDS", "starting to download form: " + url);
 
                     mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), url, mcall);
                     startDownload();
@@ -223,9 +246,56 @@ public class MainActivity extends AppCompatActivity
 
                 initWords();
 
+
+                if (ShareDialog.canShow(ShareLinkContent.class)) {
+                    ShareLinkContent linkContent = new ShareLinkContent.Builder()
+                            .setContentUrl(Uri.parse("http://developers.facebook.com/android"))
+                            .build();
+                    shareDialog.show(linkContent);
+                }
             }
         });
+
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+//        try {
+//            PackageInfo info = getPackageManager().getPackageInfo(
+//                    "com.example.gilad.wordtemplate",
+//                    PackageManager.GET_SIGNATURES);
+//            for (Signature signature : info.signatures) {
+//                MessageDigest md = MessageDigest.getInstance("SHA");
+//                md.update(signature.toByteArray());
+//                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+//            }
+//        } catch (PackageManager.NameNotFoundException e) {
+//
+//        } catch (NoSuchAlgorithmException e) {
+//
+//        }
+
     }
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
 
     private void startDownload() {
         if (!mDownloading && mNetworkFragment != null) {
@@ -243,8 +313,19 @@ public class MainActivity extends AppCompatActivity
         applyChars();
         setChoicesBoxes();
         findViewById(R.id.hintsActionButton).setOnClickListener(new HintsListener(word, hint1, hint2));
-        penelty = 0;
+        penalty = 0;
         tries = 0;
+
+        t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR){
+                    t1.setLanguage(Locale.US);
+                }
+            }
+        });
+        findViewById(R.id.textToVoiceBtn).setOnClickListener(new TextLsn(t1,word));
+
     }
 
     @Override
@@ -327,6 +408,22 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    private class TextLsn implements View.OnClickListener{
+
+        private TextToSpeech t1;
+        private String word;
+
+        private TextLsn(TextToSpeech t, String word){
+            this.t1 = t;
+            this.word = word;
+        }
+
+        @Override
+        public void onClick(View v) {
+            t1.speak(word, TextToSpeech.QUEUE_FLUSH,null, word);
+        }
+    }
+
     private class selectionListener implements View.OnClickListener {
 
         private int index = -1;
@@ -348,22 +445,24 @@ public class MainActivity extends AppCompatActivity
                 btn.setVisibility(View.INVISIBLE);
                 transSoFar = transSoFar + btn.getText();
                 tries++;
-                if (tries == translate.length() + 4 && penelty < 500) {
+                if (tries == translate.length() + 4 && penalty < 500) {
                     tries = 0;
-                    penelty += 50;
+                    penalty += 50;
                 }
                 if (transSoFar.equals(translate)) {
 
                     FirebaseDatabase db = FirebaseDatabase.getInstance();
                     DatabaseReference ref = db.getReference();
 
-                    thisUser.points += (pointsEarned - penelty);
-                    thisUser.achievements.put("a1", thisUser.achievements.get("a1") + 1);
+                    thisUser.points += (pointsEarned - penalty);
 
                     Map<String, Object> update = new HashMap<>();
                     Map<String, Object> seenWord = new HashMap<>();
                     update.put("points", thisUser.points);
-                    update.put("achievements/a1", thisUser.achievements.get("a1"));
+
+
+                    increaseAchiv(update,"a1");
+
 
                     seenWord.put("word", word);
                     seenWord.put("translate", translate);
@@ -385,7 +484,7 @@ public class MainActivity extends AppCompatActivity
                     ref.child(account.getId()).updateChildren(update);
 
                     FragmentManager fm = getSupportFragmentManager();
-                    CorrectFragment cf = CorrectFragment.newInstance(pointsEarned - penelty, selfPointer);
+                    CorrectFragment cf = CorrectFragment.newInstance(pointsEarned - penalty, selfPointer);
 
                     final HashMap<String, String> map = new HashMap<>();
                     map.put("word", word);
@@ -403,8 +502,51 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void increaseAchiv(Map<String, Object> map, String achiv){
+
+        int curr = thisUser.achievements.get(achiv);
+        if(curr < maxAchivMap.get(achiv)) {
+
+            thisUser.achievements.put(achiv, thisUser.achievements.get(achiv) + 1);
+
+            map.put("achievements/" + achiv, thisUser.achievements.get(achiv));
+
+            if((int)thisUser.achievements.get(achiv) ==  maxAchivMap.get(achiv)){ //achievement complete
+
+                FragmentManager fm;
+                AchivCompleteFrag af;
+
+                fm = getSupportFragmentManager();
+                af = AchivCompleteFrag.newInstance(achiv, selfPointer);
+                af.show(fm, "fragment_edit_name");
+
+            }
+
+        }
+
+
+    }
+
+    private void initAchivMap(){
+        if(maxAchivMap == null) {
+            maxAchivMap = new HashMap<>();
+            maxAchivMap.put("a1", 100);
+            maxAchivMap.put("a2", 3);
+            maxAchivMap.put("a3", 3);
+            maxAchivMap.put("a4", 3);
+            maxAchivMap.put("a5", 3);
+            maxAchivMap.put("a6", 3);
+            maxAchivMap.put("a7", 3);
+            maxAchivMap.put("a8", 3);
+            maxAchivMap.put("a9", 3);
+            maxAchivMap.put("a10", 3);
+        }
+
+    }
+
+
     private void postToServer(JSONArray arr) {
-        String postUrl = "http://trendy-words.herokuapp.com/" + userID;
+        String postUrl = "http://trendy-words.herokuapp.com/" + userID + "/update";
 
         JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.POST, postUrl, arr,
                 new Response.Listener<JSONArray>() {
@@ -425,7 +567,6 @@ public class MainActivity extends AppCompatActivity
         };
 
         myRequestQueue.add(jsonobj);
-
     }
 
     private class choiceListener implements View.OnClickListener {
@@ -475,22 +616,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class AchivListener implements View.OnClickListener {
-        FragmentManager fm;
-        AchivFragment tf;
-
-        //user id?
-        private AchivListener() {
-            this.fm = getSupportFragmentManager();
-            this.tf = AchivFragment.newInstance(account.getId());
-        }
-
-        @Override
-        public void onClick(View v) {
-            tf.show(fm, "fragment_achievements");
-        }
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -520,6 +645,13 @@ public class MainActivity extends AppCompatActivity
                             startActivity(intent);
                         }
                     });
+        } else if (id == R.id.nav_achiv) {
+            FragmentManager fm;
+            AchivFragment tf;
+            fm = getSupportFragmentManager();
+            tf = AchivFragment.newInstance(account.getId());
+
+            tf.show(fm, "fragment_achievements");
         }
 
 
@@ -549,10 +681,7 @@ public class MainActivity extends AppCompatActivity
                 );
                 hint1 = currJsonWord.getString("sentence");
                 hint2 = currJsonWord.getString("definition");
-                currentWordCategory = currJsonWord.getJSONArray("categories").getString(0);
-
-                if (currentWordCategory.equals("CS") || currentWordCategory.equals("PROGRAMMING"))
-                    currentWordCategory = "TECHNOLOGY";
+                currentWordCategory = getJsonCategory(currJsonWord);
 
                 remWords.remove(0);
             } catch (Exception e) {
@@ -564,6 +693,14 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private String getJsonCategory(JSONObject json){
+        try {
+            String cat = json.getJSONArray("categories").getString(0);
+            if (cat.equals("CS") || cat.equals("PROGRAMMING"))
+                cat = "TECHNOLOGY";
+            return cat;
+        }catch (Exception e){ return null;}
+    }
 
     @Override
     public void updateFromDownload(String result) {
@@ -573,7 +710,16 @@ public class MainActivity extends AppCompatActivity
             for (int i = 0; i < root.length(); i++)
                 remWords.add((JSONObject) root.get(i));
             Collections.shuffle(remWords);
-
+            //sort by favorite category
+            Collections.sort(remWords, new Comparator<JSONObject>() {
+                @Override
+                public int compare(JSONObject o1, JSONObject o2) {
+                    int a1 = thisUser.categories.get(getJsonCategory(o1));
+                    int a2 =  thisUser.categories.get(getJsonCategory(o2));
+                    return Integer.compare(a1,a2);
+                }
+            });
+            Log.e("TTTTTT", "Amount of words is " + root.length());
         } catch (Exception e) {
             Log.e("BAD ERROR", e.getMessage());
         }

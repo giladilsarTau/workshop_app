@@ -6,18 +6,28 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +47,9 @@ public class CategoriesActivity extends AppCompatActivity {
     String id;
 
     CategoriesActivity selfPointer;
+    RequestQueue myRequestQueue;
 
+    String trendyId;
     private static final Map<String, Integer> catMap = new HashMap<>();
 
     @Override
@@ -48,6 +60,7 @@ public class CategoriesActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         id = getIntent().getStringExtra("ID");
+
         selfPointer = this;
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -71,6 +84,7 @@ public class CategoriesActivity extends AppCompatActivity {
         cat6.setOnClickListener(new CatBtnLis(6));
 
         seekBar = (SeekBar) findViewById(R.id.catSeekBar);
+        myRequestQueue = Volley.newRequestQueue(this);
 
         for (int i = 1; i <= 6; i++) {
             int id = getResources().getIdentifier("imageViewCat" + i,
@@ -88,7 +102,7 @@ public class CategoriesActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 UserClass u = dataSnapshot.getValue(UserClass.class);
-
+                trendyId = u.trendyId;
 
                 catMap.putAll(u.categories);
                 for (String key : catMap.keySet()) {
@@ -122,6 +136,28 @@ public class CategoriesActivity extends AppCompatActivity {
                 DatabaseReference ref = db.getReference();
                 ref.child(id).updateChildren(map);
 
+
+                String postUrl = "http://trendy-words.herokuapp.com/" + trendyId + "?level=" +  DiffEnum.getDiffFromIndex(seekBar.getProgress()).name;
+
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, postUrl,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                Log.e("TTTT", "response is : " + response.toString());
+
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.e("TTTT", "error is: " + error.toString());
+                            }
+                        }
+                ) {
+                    //here I want to post data to sever
+                };
+
+                myRequestQueue.add(stringRequest);
 
                 NavUtils.navigateUpFromSameTask(selfPointer);
 
