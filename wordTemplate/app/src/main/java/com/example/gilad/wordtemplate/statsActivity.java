@@ -33,7 +33,6 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
 
 
 
-    private GoogleSignInAccount account;
     private String id;
     private UserClass u;
 
@@ -54,8 +53,7 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
         setContentView(R.layout.activity_stats);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        account = getIntent().getParcelableExtra("account");
-        id = account.getId();
+        id = getIntent().getStringExtra("ID");
 
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();

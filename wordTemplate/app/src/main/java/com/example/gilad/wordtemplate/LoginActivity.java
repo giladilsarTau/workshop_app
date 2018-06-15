@@ -38,6 +38,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -91,6 +97,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
 
     RequestQueue myRequestQueue;
 
+    CallbackManager callbackManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,8 +115,47 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         signin.setSize(SignInButton.SIZE_STANDARD);
 
         signin.setOnClickListener(this);
+        callbackManager = CallbackManager.Factory.create();
 
-    }
+        LoginButton faceLogin = (LoginButton) findViewById(R.id.login_facebook);
+        faceLogin.setReadPermissions(Arrays.asList("email"));
+        faceLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+
+                final AccessToken token = loginResult.getAccessToken();
+
+                ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.hasChild(token.getUserId())) {
+                            //createNewUser(account.getId());
+                            postToServer(token.getUserId(), null, token);
+                        } else{
+                            updateUI(null, token);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.e("TTTT", "error: " + error);
+
+            }
+        });
+            }
 
     @Override
     protected void onStart() {
@@ -117,13 +163,19 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
 
-            updateUI(account);
+            updateUI(account,null);
+        }
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if(accessToken != null && !accessToken.isExpired()){
+            updateUI(null,accessToken);
+
         }
 
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    //    callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
@@ -132,6 +184,8 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
             // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
+        } else{
+            callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -145,9 +199,9 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (!dataSnapshot.hasChild(account.getId())) {
                         //createNewUser(account.getId());
-                        postToServer(account.getId(), account);
+                        postToServer(account.getId(), account, null);
                     } else{
-                        updateUI(account);
+                        updateUI(account, null);
                     }
 
                 }
@@ -188,9 +242,10 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         ref.child(id).updateChildren(map);
     }
 
-    private void updateUI(GoogleSignInAccount account) {
+    private void updateUI(GoogleSignInAccount account, AccessToken faceToken) {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.putExtra("GoogleAccount", account);
+        intent.putExtra("FacebookToken", faceToken);
         startActivity(intent);
     }
 
@@ -267,7 +322,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         return buffer.toString();
     }
 
-    private void postToServer(final String myId, final GoogleSignInAccount account) {
+    private void postToServer(final String myId, final GoogleSignInAccount account, final AccessToken token) {
         String postUrl = "http://trendy-words.herokuapp.com/newUser?level=BEGINNER";
 
 
@@ -296,7 +351,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
                     map.put("categories/" + CategoriesActivity.CategoryEnum.getCatFromIndex(i).name, 0);
 
                 ref.child(myId).updateChildren(map);
-                updateUI(account);
+                updateUI(account, token);
 
 
             }

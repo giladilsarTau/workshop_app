@@ -1,9 +1,11 @@
 package com.example.gilad.wordtemplate.dummy;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.example.gilad.wordtemplate.MainActivity;
 import com.example.gilad.wordtemplate.MyAchivRecyclerViewAdapter;
+import com.example.gilad.wordtemplate.R;
 import com.example.gilad.wordtemplate.UserClass;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -38,9 +40,9 @@ public class AchivContent {
     private static final int COUNT = 10;
 
 
-    public static List<AchivItem> initItems(String userId) {
+    public static List<AchivItem> initItems(String userId, Context context) {
         for (int i = 1; i <= COUNT; i++) {
-            addItem(createItem(i, userId));
+            addItem(createItem(i, userId, context));
         }
         return ITEMS;
     }
@@ -50,7 +52,7 @@ public class AchivContent {
         ITEM_MAP.put(item.id, item);
     }
 
-    private static AchivItem createItem(int position, String userID) {
+    private static AchivItem createItem(int position, String userID, Context context) {
         //TODO use getters from users DB
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
@@ -64,14 +66,19 @@ public class AchivContent {
 
         Log.e("TAG TAG TAG", "NOW IS:  " + l.res);
 
+        int id = context.getResources().getIdentifier("a" + position, "array", context.getPackageName());
+        String[] acheivemntStr = context.getResources().getStringArray(id);
 
-        String desc = "some description about achievement " + position;
-        if (position == 1)
-            return new AchivItem(String.valueOf(position), "Solver", makeDetails(position)
-                    , "solve 100 words", 0, 100);
-        else
-            return new AchivItem(String.valueOf(position), "Achievement " + position, makeDetails(position)
-                    , desc, 0, 10);
+        return new AchivItem(String.valueOf(position), acheivemntStr[0], makeDetails(position)
+                , acheivemntStr[1], 0, MainActivity.maxAchivMap.get("a"+position));
+
+//        String desc = "some description about achievement " + position;
+//        if (position == 1)
+//            return new AchivItem(String.valueOf(position), "Solver", makeDetails(position)
+//                    , "solve 100 words", 0, 100);
+//        else
+//            return new AchivItem(String.valueOf(position), "Achievement " + position, makeDetails(position)
+//                    , desc, 0, 10);
     }
 
     private static String makeDetails(int position) {

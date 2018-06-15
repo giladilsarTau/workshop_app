@@ -42,6 +42,59 @@
 
     </string-array>
 
+
+    <string-array name="a1">
+        <item>Solver</item>
+        <item>Solve 100 words</item>
+        <item>solved 100 words correctly</item>
+    </string-array>
+    <string-array name="a2">
+        <item>Player</item>
+        <item>Play everyday for a week</item>
+        <item>played everyday for a week</item>
+    </string-array>
+    <string-array name="a3">
+        <item>Perfectionist</item>
+        <item>Solve 50 perfectly</item>
+        <item>solved 50 words perfectly</item>
+    </string-array>
+    <string-array name="a4">
+        <item>Wise man</item>
+        <item>Solve 50 without hints</item>
+        <item>solved 50 without using hints</item>
+    </string-array>
+    <string-array name="a5">
+        <item>Hard Boiled</item>
+        <item>Solve 50 hard words</item>
+        <item>solved 50 hard words</item>
+    </string-array>
+    <string-array name="a6">
+        <item>Superstar</item>
+        <item>Save 25000 points</item>
+        <item>achieved and saved 25000 points</item>
+    </string-array>
+    <string-array name="a7">
+        <item>Mega Streak</item>
+        <item>Answer 50 words without skipping</item>
+        <item>answered 50 words without skipping</item>
+    </string-array>
+    <string-array name="a8">
+        <item>Expert</item>
+        <item>Answer 100 words from specific category</item>
+        <item>answered 100 words from specific category</item>
+    </string-array>
+
+    <string-array name="a9">
+        <item>Master</item>
+        <item>Answer 100 words in each category</item>
+        <item>answered 100 words in each category</item>
+    </string-array>
+    <string-array name="a10">
+        <item>Hidden</item>
+        <item>This achievement is hidden</item>
+        <item>answered 100 words in each category</item>
+    </string-array>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

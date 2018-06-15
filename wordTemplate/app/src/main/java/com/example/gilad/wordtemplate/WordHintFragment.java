@@ -33,7 +33,8 @@ public class WordHintFragment extends DialogFragment {
 
     private TextView hint1;
     private TextView hint2;
-
+    private String userId;
+    private  MainActivity father;
     private OnFragmentInteractionListener mListener;
 
 
@@ -50,7 +51,7 @@ public class WordHintFragment extends DialogFragment {
      * @return A new instance of fragment WordHintFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WordHintFragment newInstance(String param1, String param2, String param3) {
+    public static WordHintFragment newInstance(String param1, String param2, String param3, String userId, MainActivity father) {
         WordHintFragment fragment = new WordHintFragment();
         Bundle args = new Bundle();
         args.putString(WORD, param1);
@@ -61,7 +62,8 @@ public class WordHintFragment extends DialogFragment {
         WordHintFragment.WORD = param1;
         WordHintFragment.HINT_1 = param2;
         WordHintFragment.HINT_2 = param3;
-
+        fragment.userId = userId;
+        fragment.father = father;
         return fragment;
     }
 
@@ -108,8 +110,8 @@ public class WordHintFragment extends DialogFragment {
                     Map<String, Object> update = new HashMap<>();
                     MainActivity.thisUser.points -= 200;
                     update.put("points", MainActivity.thisUser.points);
-                    ref.child("user").updateChildren(update);
-
+                    ref.child(userId).updateChildren(update);
+                    father.usedHint = true;
                 }
                 else if(!isHint2 && MainActivity.thisUser.points >= 200){
                     hint2.setVisibility(View.VISIBLE);
@@ -118,7 +120,7 @@ public class WordHintFragment extends DialogFragment {
                     Map<String, Object> update = new HashMap<>();
                     MainActivity.thisUser.points -= 200;
                     update.put("points", MainActivity.thisUser.points);
-                    ref.child("user").updateChildren(update);
+                    ref.child(userId).updateChildren(update);
 
                     ((ViewGroup)v.getParent()).removeView(v);
                 }

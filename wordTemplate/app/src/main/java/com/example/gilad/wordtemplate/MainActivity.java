@@ -38,9 +38,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.gilad.wordtemplate.dummy.AchivContent;
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
@@ -118,7 +120,13 @@ public class MainActivity extends AppCompatActivity
     MainActivity selfPointer;
 
     static GoogleSignInAccount account = null;
+    static AccessToken token = null;
+    static boolean accountInit = false;
+    static String myId = null;
     RequestQueue myRequestQueue;
+    boolean isPerfectWord;
+    boolean usedHint;
+
 
 
     public static Map<String, Integer> maxAchivMap = null;
@@ -130,8 +138,12 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         mcall = this;
         selfPointer = this;
-        if (account == null)
+        if (!accountInit) {
             account = getIntent().getParcelableExtra("GoogleAccount");
+            token = getIntent().getParcelableExtra("FacebookToken");
+            accountInit = true;
+        }
+        myId = account == null ? token.getUserId() : account.getId();
         initAchivMap();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -149,8 +161,10 @@ public class MainActivity extends AppCompatActivity
 
 
         View header = navigationView.getHeaderView(0);
-        ((TextView) header.findViewById(R.id.navMail)).setText(account.getEmail());
-        ((TextView) header.findViewById(R.id.navName)).setText(account.getDisplayName());
+        if (account != null) {
+            ((TextView) header.findViewById(R.id.navMail)).setText(account.getEmail());
+            ((TextView) header.findViewById(R.id.navName)).setText(account.getDisplayName());
+        }
 
         //find the selection buttons
         for (int i = 1; i <= numOfSelections; i++) {
@@ -177,7 +191,7 @@ public class MainActivity extends AppCompatActivity
         DatabaseReference ref = db.getReference();
 
 
-        Query query = ref.child(account.getId());
+        Query query = ref.child(myId);
         query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -247,15 +261,15 @@ public class MainActivity extends AppCompatActivity
                 initWords();
 
 
-                if (ShareDialog.canShow(ShareLinkContent.class)) {
-                    ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                            .setContentUrl(Uri.parse("http://developers.facebook.com/android"))
-                            .build();
-                    shareDialog.show(linkContent);
-                }
+//                if (ShareDialog.canShow(ShareLinkContent.class)) {
+//                    ShareLinkContent linkContent = new ShareLinkContent.Builder()
+//                            .setContentUrl(Uri.parse("http://developers.facebook.com/android"))
+//                            .build();
+//                    shareDialog.show(linkContent);
+//                }
             }
         });
-
+        FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
         shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
@@ -290,6 +304,7 @@ public class MainActivity extends AppCompatActivity
 //        }
 
     }
+
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -319,13 +334,14 @@ public class MainActivity extends AppCompatActivity
         t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                if(status != TextToSpeech.ERROR){
+                if (status != TextToSpeech.ERROR) {
                     t1.setLanguage(Locale.US);
                 }
             }
         });
-        findViewById(R.id.textToVoiceBtn).setOnClickListener(new TextLsn(t1,word));
-
+        findViewById(R.id.textToVoiceBtn).setOnClickListener(new TextLsn(t1, word));
+        isPerfectWord = true;
+        usedHint = false;
     }
 
     @Override
@@ -408,19 +424,19 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private class TextLsn implements View.OnClickListener{
+    private class TextLsn implements View.OnClickListener {
 
         private TextToSpeech t1;
         private String word;
 
-        private TextLsn(TextToSpeech t, String word){
+        private TextLsn(TextToSpeech t, String word) {
             this.t1 = t;
             this.word = word;
         }
 
         @Override
         public void onClick(View v) {
-            t1.speak(word, TextToSpeech.QUEUE_FLUSH,null, word);
+            t1.speak(word, TextToSpeech.QUEUE_FLUSH, null, word);
         }
     }
 
@@ -461,7 +477,13 @@ public class MainActivity extends AppCompatActivity
                     update.put("points", thisUser.points);
 
 
-                    increaseAchiv(update,"a1");
+                    increaseAchiv(update, "a1");
+                    if(!usedHint)
+                        increaseAchiv(update,"a4");
+                    if(isPerfectWord)
+                        increaseAchiv(update,"a3");
+
+
 
 
                     seenWord.put("word", word);
@@ -470,18 +492,22 @@ public class MainActivity extends AppCompatActivity
                     seenWord.put("category", currentWordCategory);
 
                     try {
-                        if (!currJsonWord.getString("level").equals("null")) {
-                            seenWord.put("level", currJsonWord.getString("level"));
+                        String level = currJsonWord.getString("level");
+                        if (!level.equals("null")) {
+
+                            seenWord.put("level", level);
+                            if(level.equals("ADVANCED"))
+                                increaseAchiv(update,"a5");
 
                         } else {
-                            seenWord.put("level", "Beginner");
+                            seenWord.put("level", "BEGINNER");
                         }
                     } catch (Exception e) {
                     }
 
                     update.put("solved/" + word, seenWord);
 
-                    ref.child(account.getId()).updateChildren(update);
+                    ref.child(myId).updateChildren(update);
 
                     FragmentManager fm = getSupportFragmentManager();
                     CorrectFragment cf = CorrectFragment.newInstance(pointsEarned - penalty, selfPointer);
@@ -502,16 +528,16 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void increaseAchiv(Map<String, Object> map, String achiv){
+    private void increaseAchiv(Map<String, Object> map, String achiv) {
 
         int curr = thisUser.achievements.get(achiv);
-        if(curr < maxAchivMap.get(achiv)) {
+        if (curr < maxAchivMap.get(achiv)) {
 
             thisUser.achievements.put(achiv, thisUser.achievements.get(achiv) + 1);
 
             map.put("achievements/" + achiv, thisUser.achievements.get(achiv));
 
-            if((int)thisUser.achievements.get(achiv) ==  maxAchivMap.get(achiv)){ //achievement complete
+            if ((int) thisUser.achievements.get(achiv) == maxAchivMap.get(achiv)) { //achievement complete
 
                 FragmentManager fm;
                 AchivCompleteFrag af;
@@ -527,18 +553,18 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void initAchivMap(){
-        if(maxAchivMap == null) {
+    private void initAchivMap() {
+        if (maxAchivMap == null) {
             maxAchivMap = new HashMap<>();
             maxAchivMap.put("a1", 100);
-            maxAchivMap.put("a2", 3);
-            maxAchivMap.put("a3", 3);
-            maxAchivMap.put("a4", 3);
-            maxAchivMap.put("a5", 3);
-            maxAchivMap.put("a6", 3);
-            maxAchivMap.put("a7", 3);
-            maxAchivMap.put("a8", 3);
-            maxAchivMap.put("a9", 3);
+            maxAchivMap.put("a2", 7);
+            maxAchivMap.put("a3", 50);
+            maxAchivMap.put("a4", 50);
+            maxAchivMap.put("a5", 50);
+            maxAchivMap.put("a6", 25000);
+            maxAchivMap.put("a7", 50);
+            maxAchivMap.put("a8", 100);
+            maxAchivMap.put("a9", 100);
             maxAchivMap.put("a10", 3);
         }
 
@@ -589,6 +615,7 @@ public class MainActivity extends AppCompatActivity
                 selection.setVisibility(View.VISIBLE);
                 choiceSelectMap.remove(choiceIndex);
                 transSoFar = transSoFar.substring(0, transSoFar.length() - 1);
+                isPerfectWord = false;
             }
         }
     }
@@ -606,7 +633,7 @@ public class MainActivity extends AppCompatActivity
             this.hint1 = hint1;
             this.hint2 = hint2;
             this.fm = getSupportFragmentManager();
-            this.tf = WordHintFragment.newInstance(word, hint1, hint2);
+            this.tf = WordHintFragment.newInstance(word, hint1, hint2, userID, selfPointer);
         }
 
         @Override
@@ -626,30 +653,38 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_stats) {
             //go stats
             Intent intent = new Intent(this, statsActivity.class);
-            intent.putExtra("account", account);
+            intent.putExtra("ID", myId);
             startActivity(intent);
 
 
         } else if (id == R.id.nav_cats) {
             //go to categories
             Intent intent = new Intent(this, CategoriesActivity.class);
-            intent.putExtra("ID", account.getId());
+            intent.putExtra("ID", myId);
             startActivity(intent);
 
         } else if (id == R.id.logout) {
-            LoginActivity.mGoogleSignInClient.signOut()
-                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Intent intent = new Intent(selfPointer, LoginActivity.class);
-                            startActivity(intent);
-                        }
-                    });
+            if(account != null) {
+                LoginActivity.mGoogleSignInClient.signOut()
+                        .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                account = null;
+                                Intent intent = new Intent(selfPointer, LoginActivity.class);
+                                startActivity(intent);
+                            }
+                        });
+            } else {
+                LoginManager.getInstance().logOut();
+                token = null;
+                Intent intent = new Intent(selfPointer, LoginActivity.class);
+                startActivity(intent);
+            }
         } else if (id == R.id.nav_achiv) {
             FragmentManager fm;
             AchivFragment tf;
             fm = getSupportFragmentManager();
-            tf = AchivFragment.newInstance(account.getId());
+            tf = AchivFragment.newInstance(myId,selfPointer);
 
             tf.show(fm, "fragment_achievements");
         }
@@ -693,13 +728,15 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private String getJsonCategory(JSONObject json){
+    private String getJsonCategory(JSONObject json) {
         try {
             String cat = json.getJSONArray("categories").getString(0);
             if (cat.equals("CS") || cat.equals("PROGRAMMING"))
                 cat = "TECHNOLOGY";
             return cat;
-        }catch (Exception e){ return null;}
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -715,8 +752,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public int compare(JSONObject o1, JSONObject o2) {
                     int a1 = thisUser.categories.get(getJsonCategory(o1));
-                    int a2 =  thisUser.categories.get(getJsonCategory(o2));
-                    return Integer.compare(a1,a2);
+                    int a2 = thisUser.categories.get(getJsonCategory(o2));
+                    return Integer.compare(a1, a2);
                 }
             });
             Log.e("TTTTTT", "Amount of words is " + root.length());

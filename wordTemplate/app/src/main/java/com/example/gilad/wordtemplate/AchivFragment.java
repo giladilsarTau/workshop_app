@@ -27,6 +27,8 @@ public class AchivFragment extends DialogFragment {
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     String userId;
+    MainActivity father;
+
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -35,12 +37,13 @@ public class AchivFragment extends DialogFragment {
     public AchivFragment() {
     }
 
-    public static AchivFragment newInstance(String userId) {
+    public static AchivFragment newInstance(String userId, MainActivity father) {
         AchivFragment fragment = new AchivFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, 1);
         fragment.setArguments(args);
         fragment.userId = userId;
+        fragment.father = father;
         return fragment;
     }
 
@@ -68,7 +71,7 @@ public class AchivFragment extends DialogFragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
 
-            recyclerView.setAdapter(new MyAchivRecyclerViewAdapter(AchivContent.initItems(userId), mListener));
+            recyclerView.setAdapter(new MyAchivRecyclerViewAdapter(AchivContent.initItems(userId, father), mListener));
         }
         return view;
     }
