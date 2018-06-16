@@ -9,6 +9,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 
 public class AchivCompleteFrag extends DialogFragment {
@@ -16,7 +18,7 @@ public class AchivCompleteFrag extends DialogFragment {
 
     private static String ACHIV = null;
     private MainActivity father;
-
+    private int pos;
 
     private OnFragmentInteractionListener mListener;
 
@@ -32,6 +34,7 @@ public class AchivCompleteFrag extends DialogFragment {
         fragment.setArguments(args);
         fragment.father = father;
         AchivCompleteFrag.ACHIV = param1;
+        fragment.pos = Integer.parseInt(param1.substring(1));
         return fragment;
     }
 
@@ -49,7 +52,10 @@ public class AchivCompleteFrag extends DialogFragment {
                 getDialog().dismiss();
             }
         });
-
+        ((ImageView)view.findViewById(R.id.completeImg)).setBackgroundResource(MyAchivRecyclerViewAdapter.posToImage(pos));
+        int id = father.getResources().getIdentifier(ACHIV, "array", father.getPackageName());
+        String[] arr = father.getResources().getStringArray(id);
+        ((TextView)view.findViewById(R.id.completeDescription)).setText(arr[2]);
         return view;
     }
 

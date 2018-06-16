@@ -47,7 +47,7 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
         holder.mDesc.setText(item.description);
         String s = String.valueOf(item.current) + "/" + String.valueOf(item.max);
         holder.mProgText.setText(s);
-
+        holder.mImage.setBackgroundResource(posToImage(position));
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,6 +87,23 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
         @Override
         public String toString() {
             return super.toString() + " '" + mContentView.getText() + "'";
+        }
+    }
+
+    public static int posToImage(int pos){
+        switch (pos){
+            case 1: return R.drawable.medal_a1;
+            case 2: return R.drawable.medal_a2;
+            case 3: return R.drawable.medal_a3;
+            case 4: return R.drawable.medal_a4;
+            case 5: return R.drawable.medal_a5;
+            case 6: return R.drawable.medal_a6;
+            case 7: return R.drawable.medal_a7;
+            case 8: return R.drawable.medal_a8;
+            case 9: return R.drawable.medal_a9;
+            case 10: return R.drawable.medal_a10;
+            default: return -1;
+
         }
     }
 }
