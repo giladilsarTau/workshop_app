@@ -72,10 +72,10 @@ public class old_WordHintFragment extends Fragment {
 
 
             FragmentManager fm = getChildFragmentManager();
-
-            WordHintFragment tf = WordHintFragment.newInstance("Android", "1.The coolest OS ever\n 2.(in science fiction) a robot with a human appearance.\n 3. Hebrew comes here", null,null);
-
-            tf.show(fm, "fragment_edit_name");
+//
+//            WordHintFragment tf = WordHintFragment.newInstance("Android", "1.The coolest OS ever\n 2.(in science fiction) a robot with a human appearance.\n 3. Hebrew comes here", null,null);
+//
+//            tf.show(fm, "fragment_edit_name");
 
         }
 

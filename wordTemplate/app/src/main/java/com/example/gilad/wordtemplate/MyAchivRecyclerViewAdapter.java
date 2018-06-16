@@ -1,6 +1,7 @@
 package com.example.gilad.wordtemplate;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,9 +51,9 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
 
 
         if(holder.mProgress.getMax() > holder.mProgress.getProgress())
-            holder.mImage.setBackgroundResource(posToImage(position));
+            holder.mImage.setImageResource(posToImage(position+1));
         else
-            holder.mImage.setBackgroundResource(R.drawable.medal_a1_completed);
+            holder.mImage.setImageResource(R.drawable.medal_a1_completed);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +109,9 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
             case 8: return R.drawable.medal_a8;
             case 9: return R.drawable.medal_a9;
             case 10: return R.drawable.medal_a10;
-            default: return -1;
+            default:
+                Log.e("TTTTT", "Wrong position: " + pos);
+                return -1;
 
         }
     }

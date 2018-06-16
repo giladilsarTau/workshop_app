@@ -13,8 +13,8 @@
         <ImageView
             android:id="@+id/correctImg"
             android:layout_width="match_parent"
-            android:layout_height="272dp"
-            app:srcCompat="@drawable/correct1" />
+            android:layout_height="246dp"
+            android:background="@drawable/correct1" />
 
         <TextView
             android:id="@+id/textView2"
@@ -33,7 +33,7 @@
 
             <Button
                 android:id="@+id/getThePoints2"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/correctBtn"
                 android:drawableBottom="@android:drawable/star_big_on"

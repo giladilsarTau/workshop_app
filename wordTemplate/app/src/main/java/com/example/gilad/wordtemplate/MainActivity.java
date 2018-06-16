@@ -2,10 +2,6 @@ package com.example.gilad.wordtemplate;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
@@ -16,7 +12,6 @@ import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -41,11 +36,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.gilad.wordtemplate.dummy.AchivContent;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
-import com.facebook.share.Sharer;
-import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -61,8 +52,6 @@ import com.google.firebase.database.ValueEventListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -73,9 +62,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -102,7 +88,7 @@ public class MainActivity extends AppCompatActivity
     List<Button> removedBtn = new ArrayList<>();
     Map<Integer, Integer> choiceSelectMap = new HashMap<>();
     String transSoFar = "";
-    String userID = "user";
+    String userTrendyID = "user";
 
     String currentWordCategory;
 
@@ -123,7 +109,7 @@ public class MainActivity extends AppCompatActivity
     static GoogleSignInAccount account = null;
     static AccessToken token = null;
     static boolean accountInit = false;
-    static String myId = null;
+    static String myDBId = null;
     RequestQueue myRequestQueue;
     boolean isPerfectWord;
     boolean usedHint;
@@ -143,7 +129,7 @@ public class MainActivity extends AppCompatActivity
             token = getIntent().getParcelableExtra("FacebookToken");
             accountInit = true;
         }
-        myId = account == null ? token.getUserId() : account.getId();
+        myDBId = account == null ? token.getUserId() : account.getId();
         initAchivMap();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -191,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         DatabaseReference ref = db.getReference();
 
 
-        Query query = ref.child(myId);
+        Query query = ref.child(myDBId);
         query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -201,7 +187,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if (s != null)
-                    if (s.equals("difficulty"))
+                    if (s.equals("hints"))
                         ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString((int) (long) dataSnapshot.getValue()));
             }
 
@@ -227,10 +213,10 @@ public class MainActivity extends AppCompatActivity
                 if (thisUser == null)
                     thisUser = u;
                 ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString(u.points));
-                userID = u.trendyId;
+                userTrendyID = u.trendyId;
 
                 if (root == null) {
-                    String url = "http://trendy-words.herokuapp.com/" + userID;
+                    String url = "http://trendy-words.herokuapp.com/" + userTrendyID;
                     Log.e("TRENDY WORDS", "starting to download form: " + url);
 
                     mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), url, mcall);
@@ -251,11 +237,20 @@ public class MainActivity extends AppCompatActivity
 
 
                 for (int i = 1; i <= translate.length(); i++) {
-                    int id = getResources().getIdentifier("choice_" + i, "id", getPackageName());
+                    int id = getResources().getIdentifier("choice_" + (translate.length() - i + 1), "id", getPackageName());
                     Button b = (Button) findViewById(id);
-                    b.setText(String.valueOf(translate.charAt(i)));
+                    b.setText(String.valueOf(translate.charAt(i - 1)));
                 }
 
+
+
+                Map<String, Object> update = new HashMap<>();
+                setAchiv(update,"a7",0);
+
+
+                FirebaseDatabase db = FirebaseDatabase.getInstance();
+                DatabaseReference ref = db.getReference();
+                ref.child(myDBId).updateChildren(update);
 
                 final HashMap<String, String> map = new HashMap<>();
                 map.put("word", word);
@@ -283,24 +278,24 @@ public class MainActivity extends AppCompatActivity
 //                }
             }
         });
-        callbackManager = CallbackManager.Factory.create();
-        shareDialog = new ShareDialog(this);
-        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
-            @Override
-            public void onSuccess(Sharer.Result result) {
-
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-
-            }
-        });
+//        callbackManager = CallbackManager.Factory.create();
+//        shareDialog = new ShareDialog(this);
+//        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+//            @Override
+//            public void onSuccess(Sharer.Result result) {
+//
+//            }
+//
+//            @Override
+//            public void onCancel() {
+//
+//            }
+//
+//            @Override
+//            public void onError(FacebookException error) {
+//
+//            }
+//        });
 //        try {
 //            PackageInfo info = getPackageManager().getPackageInfo(
 //                    "com.example.gilad.wordtemplate",
@@ -488,13 +483,16 @@ public class MainActivity extends AppCompatActivity
                     Map<String, Object> update = new HashMap<>();
                     Map<String, Object> seenWord = new HashMap<>();
                     update.put("points", thisUser.points);
+                    if(thisUser.points < maxAchivMap.get("a6"))
+                        setAchiv(update,"a6",thisUser.points);
 
 
                     increaseAchiv(update, "a1");
+                    increaseAchiv(update, "a7");
                     if (!usedHint)
                         increaseAchiv(update, "a4");
-                    else
-                        update.put("hints/" +Calendar.getInstance().getTime().getTime(),1);
+
+
                     if (isPerfectWord)
                         increaseAchiv(update, "a3");
 
@@ -520,7 +518,7 @@ public class MainActivity extends AppCompatActivity
 
                     update.put("solved/" + word, seenWord);
 
-                    ref.child(myId).updateChildren(update);
+                    ref.child(myDBId).updateChildren(update);
 
                     FragmentManager fm = getSupportFragmentManager();
                     CorrectFragment cf = CorrectFragment.newInstance(pointsEarned - penalty, selfPointer);
@@ -562,8 +560,28 @@ public class MainActivity extends AppCompatActivity
             }
 
         }
+    }
+    private void setAchiv(Map<String, Object> map, String achiv, int value) {
 
+        int curr = thisUser.achievements.get(achiv);
+        if (curr < maxAchivMap.get(achiv)) {
 
+            thisUser.achievements.put(achiv,value);
+
+            map.put("achievements/" + achiv, thisUser.achievements.get(achiv));
+
+            if ((int) thisUser.achievements.get(achiv) >= maxAchivMap.get(achiv)) { //achievement complete
+
+                FragmentManager fm;
+                AchivCompleteFrag af;
+
+                fm = getSupportFragmentManager();
+                af = AchivCompleteFrag.newInstance(achiv, selfPointer);
+                af.show(fm, "fragment_edit_name");
+
+            }
+
+        }
     }
 
     private void initAchivMap() {
@@ -585,7 +603,7 @@ public class MainActivity extends AppCompatActivity
 
 
     private void postToServer(JSONArray arr) {
-        String postUrl = "http://trendy-words.herokuapp.com/" + userID + "/update";
+        String postUrl = "http://trendy-words.herokuapp.com/" + userTrendyID + "/update";
 
         JsonArrayRequest jsonobj = new JsonArrayRequest(Request.Method.POST, postUrl, arr,
                 new Response.Listener<JSONArray>() {
@@ -646,7 +664,7 @@ public class MainActivity extends AppCompatActivity
             this.hint1 = hint1;
             this.hint2 = hint2;
             this.fm = getSupportFragmentManager();
-            this.tf = WordHintFragment.newInstance(word, hint1, hint2, userID, selfPointer);
+            this.tf = WordHintFragment.newInstance(word, hint1, hint2, myDBId, selfPointer);
         }
 
         @Override
@@ -666,14 +684,14 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_stats) {
             //go stats
             Intent intent = new Intent(this, statsActivity.class);
-            intent.putExtra("ID", myId);
+            intent.putExtra("ID", myDBId);
             startActivity(intent);
 
 
         } else if (id == R.id.nav_cats) {
             //go to categories
             Intent intent = new Intent(this, CategoriesActivity.class);
-            intent.putExtra("ID", myId);
+            intent.putExtra("ID", myDBId);
             startActivity(intent);
 
         } else if (id == R.id.logout) {
@@ -697,7 +715,7 @@ public class MainActivity extends AppCompatActivity
             FragmentManager fm;
             AchivFragment tf;
             fm = getSupportFragmentManager();
-            tf = AchivFragment.newInstance(myId, selfPointer);
+            tf = AchivFragment.newInstance(myDBId, selfPointer);
 
             tf.show(fm, "fragment_achievements");
         }

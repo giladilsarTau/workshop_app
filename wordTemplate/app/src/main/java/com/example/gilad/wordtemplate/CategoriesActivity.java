@@ -96,7 +96,7 @@ public class CategoriesActivity extends AppCompatActivity {
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference ref = db.getReference();
 
-        //Query query = ref.child(userID).child("achievements");
+        //Query query = ref.child(userTrendyID).child("achievements");
         Query query = ref.child(id);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

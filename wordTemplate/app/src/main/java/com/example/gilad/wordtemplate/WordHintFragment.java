@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -110,6 +111,7 @@ public class WordHintFragment extends DialogFragment {
                     Map<String, Object> update = new HashMap<>();
                     MainActivity.thisUser.points -= 200;
                     update.put("points", MainActivity.thisUser.points);
+                    update.put("hints/" + Calendar.getInstance().getTime().getTime(),1);
                     ref.child(userId).updateChildren(update);
                     father.usedHint = true;
                 }
@@ -120,6 +122,7 @@ public class WordHintFragment extends DialogFragment {
                     Map<String, Object> update = new HashMap<>();
                     MainActivity.thisUser.points -= 200;
                     update.put("points", MainActivity.thisUser.points);
+                    update.put("hints/" +Calendar.getInstance().getTime().getTime(),1);
                     ref.child(userId).updateChildren(update);
 
                     ((ViewGroup)v.getParent()).removeView(v);

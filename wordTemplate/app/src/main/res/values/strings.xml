@@ -8,7 +8,7 @@
     <string name="action_settings">Settings</string>
     <string name="example_text_placeholder">"a space station run by androids"</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="welcome_place_holder">Welcome to the Trendy Words</string>
+    <string name="welcome_place_holder">Welcome to Trendy Words</string>
 
 
     <string name="facebook_app_id">208470126635317</string>
@@ -60,7 +60,7 @@
         <item>solved 50 words perfectly</item>
     </string-array>
     <string-array name="a4">
-        <item>Wise man</item>
+        <item>Scholar</item>
         <item>Solve 50 without hints</item>
         <item>solved 50 without using hints</item>
     </string-array>

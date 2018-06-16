@@ -79,23 +79,11 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
                     Map<String, Object> solved = (Map<String, Object>) obj;
                     long diff = currentTime - (long) solved.get("time");
                     int days = (int) (diff / (1000 * 60 * 60 * 24));
-                    Log.e("TTTTT", "days is is " + days);
-
                     if (timeCount.containsKey(days))
                         timeCount.put(days, timeCount.get(days) + 1);
                     else
                         timeCount.put(days, 1);
                 }
-
-                wordsOverTime = wordsOverTime();
-                hintsOverTime = hintsOverTime();
-
-                wordsPerDay = wordsPerDay();
-
-                //amount of words over time
-
-                graph.addSeries(wordsPerDay);
-                setWordsPerDayGraph();
 
                 if(u.hints != null){
                     for(String timeStr : u.hints.keySet()){
@@ -111,6 +99,20 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
                 } else{
                     hintsCount.put(0,0);
                 }
+
+
+                wordsOverTime = wordsOverTime();
+                hintsOverTime = hintsOverTime();
+
+                wordsPerDay = wordsPerDay();
+                hintsPerDay = hintsPerDay();
+
+                //amount of words over time
+
+                graph.addSeries(wordsPerDay);
+                setWordsPerDayGraph();
+
+
 
 
 
