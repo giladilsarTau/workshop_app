@@ -112,12 +112,6 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
                 graph.addSeries(wordsPerDay);
                 setWordsPerDayGraph();
 
-
-
-
-
-
-
             }
 
             @Override

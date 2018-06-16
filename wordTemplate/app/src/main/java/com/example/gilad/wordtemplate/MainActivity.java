@@ -734,10 +734,10 @@ public class MainActivity extends AppCompatActivity
 
     public void getNewWord() {
         if (root == null) {
-            word = "house";
-            translate = "בית";
-            hint1 = "bla bla";
-            hint2 = "bla bla bla bla bla";
+            word = "Achievement";
+            translate = "הישג";
+            hint1 = "My biggest achievement is my son";
+            hint2 = "Accomplishment";
         } else {
             try {
                 currJsonWord = remWords.get(0);

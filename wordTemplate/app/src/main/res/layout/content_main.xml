@@ -71,6 +71,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="198dp"
+        android:background="@drawable/loud_blue"
         android:clickable="true"
         android:src="@drawable/loud" />
 
