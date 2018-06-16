@@ -50,16 +50,21 @@
         <Button
             android:id="@+id/sweetBtn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginRight="100dp"
             android:layout_weight="1"
-            android:text="Sweet!" />
+            android:background="#56d770"
+            android:text="Sweet!"
+            android:textSize="18sp" />
 
         <Button
-            android:id="@+id/button3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/completeShare"
+            android:layout_width="130dp"
+            android:layout_height="50dp"
             android:layout_weight="1"
-            android:text="Button" />
+            android:background="@color/com_facebook_button_send_background_color"
+            android:drawableLeft="@drawable/ic_menu_share"
+            android:text="Share on Facebook"
+            android:textSize="18sp" />
     </LinearLayout>
 </LinearLayout>

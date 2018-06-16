@@ -1,6 +1,8 @@
 package com.example.gilad.wordtemplate;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +14,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
+
 
 public class AchivCompleteFrag extends DialogFragment {
 
@@ -19,6 +31,8 @@ public class AchivCompleteFrag extends DialogFragment {
     private static String ACHIV = null;
     private MainActivity father;
     private int pos;
+    ShareDialog shareDialog;
+    CallbackManager callbackManager;
 
     private OnFragmentInteractionListener mListener;
 
@@ -46,12 +60,53 @@ public class AchivCompleteFrag extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_achiv_complete, container, false);
 
 
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+
         view.findViewById(R.id.sweetBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getDialog().dismiss();
             }
         });
+
+        view.findViewById(R.id.completeShare).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (ShareDialog.canShow(ShareLinkContent.class)) {
+                    Bitmap bm = BitmapFactory.decodeResource(father.getResources(), MyAchivRecyclerViewAdapter.posToImage(pos));
+                    SharePhoto photo = new SharePhoto.Builder()
+                            .setBitmap(bm)
+                            .setCaption("Check out my newest achievement in TrendyWords!")
+                            .build();
+                    SharePhotoContent content = new SharePhotoContent.Builder()
+                            .addPhoto(photo)
+                            .build();
+                    shareDialog.show(content);
+
+
+
+                }
+            }
+        });
+
         ((ImageView)view.findViewById(R.id.completeImg)).setBackgroundResource(MyAchivRecyclerViewAdapter.posToImage(pos));
         int id = father.getResources().getIdentifier(ACHIV, "array", father.getPackageName());
         String[] arr = father.getResources().getStringArray(id);

@@ -47,7 +47,13 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
         holder.mDesc.setText(item.description);
         String s = String.valueOf(item.current) + "/" + String.valueOf(item.max);
         holder.mProgText.setText(s);
-        holder.mImage.setBackgroundResource(posToImage(position));
+
+
+        if(holder.mProgress.getMax() > holder.mProgress.getProgress())
+            holder.mImage.setBackgroundResource(posToImage(position));
+        else
+            holder.mImage.setBackgroundResource(R.drawable.medal_a1_completed);
+
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

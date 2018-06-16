@@ -10,6 +10,7 @@ public class UserClass {
     public String difficulty;
     public Map<String, Integer> categories = null;
     public Map<String, Object> solved = null;
+    public Map<String, Integer> hints = null;
 
 
 

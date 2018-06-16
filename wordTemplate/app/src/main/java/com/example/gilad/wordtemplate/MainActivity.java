@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
@@ -126,7 +127,6 @@ public class MainActivity extends AppCompatActivity
     RequestQueue myRequestQueue;
     boolean isPerfectWord;
     boolean usedHint;
-
 
 
     public static Map<String, Integer> maxAchivMap = null;
@@ -248,6 +248,15 @@ public class MainActivity extends AppCompatActivity
         findViewById(R.id.give_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
+                for (int i = 1; i <= translate.length(); i++) {
+                    int id = getResources().getIdentifier("choice_" + i, "id", getPackageName());
+                    Button b = (Button) findViewById(id);
+                    b.setText(String.valueOf(translate.charAt(i)));
+                }
+
+
                 final HashMap<String, String> map = new HashMap<>();
                 map.put("word", word);
                 map.put("knowledge", "NO_ANSWER");
@@ -257,10 +266,15 @@ public class MainActivity extends AppCompatActivity
                 arr.put(object);
 
                 postToServer(arr);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        initWords();
+                    }
+                }, 2000);
 
-                initWords();
-
-
+//
 //                if (ShareDialog.canShow(ShareLinkContent.class)) {
 //                    ShareLinkContent linkContent = new ShareLinkContent.Builder()
 //                            .setContentUrl(Uri.parse("http://developers.facebook.com/android"))
@@ -269,7 +283,6 @@ public class MainActivity extends AppCompatActivity
 //                }
             }
         });
-        FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
         shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
@@ -478,12 +491,12 @@ public class MainActivity extends AppCompatActivity
 
 
                     increaseAchiv(update, "a1");
-                    if(!usedHint)
-                        increaseAchiv(update,"a4");
-                    if(isPerfectWord)
-                        increaseAchiv(update,"a3");
-
-
+                    if (!usedHint)
+                        increaseAchiv(update, "a4");
+                    else
+                        update.put("hints/" +Calendar.getInstance().getTime().getTime(),1);
+                    if (isPerfectWord)
+                        increaseAchiv(update, "a3");
 
 
                     seenWord.put("word", word);
@@ -496,8 +509,8 @@ public class MainActivity extends AppCompatActivity
                         if (!level.equals("null")) {
 
                             seenWord.put("level", level);
-                            if(level.equals("ADVANCED"))
-                                increaseAchiv(update,"a5");
+                            if (level.equals("ADVANCED"))
+                                increaseAchiv(update, "a5");
 
                         } else {
                             seenWord.put("level", "BEGINNER");
@@ -664,7 +677,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
 
         } else if (id == R.id.logout) {
-            if(account != null) {
+            if (account != null) {
                 LoginActivity.mGoogleSignInClient.signOut()
                         .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                             @Override
@@ -684,7 +697,7 @@ public class MainActivity extends AppCompatActivity
             FragmentManager fm;
             AchivFragment tf;
             fm = getSupportFragmentManager();
-            tf = AchivFragment.newInstance(myId,selfPointer);
+            tf = AchivFragment.newInstance(myId, selfPointer);
 
             tf.show(fm, "fragment_achievements");
         }

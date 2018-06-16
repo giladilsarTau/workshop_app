@@ -38,11 +38,15 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private Series wordsOverTime;
     private Series wordsPerDay;
+    private Series hintsOverTime;
+    private Series hintsPerDay;
 
 
     private GraphView graph;
     private TextView subText;
     private Map<Integer, Integer> timeCount = new HashMap<>();
+    private Map<Integer, Integer> hintsCount = new HashMap<>();
+
 
     private Spinner spinner;
 
@@ -84,12 +88,32 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
                 }
 
                 wordsOverTime = wordsOverTime();
+                hintsOverTime = hintsOverTime();
+
                 wordsPerDay = wordsPerDay();
 
                 //amount of words over time
 
                 graph.addSeries(wordsPerDay);
                 setWordsPerDayGraph();
+
+                if(u.hints != null){
+                    for(String timeStr : u.hints.keySet()){
+                        long time = Long.parseLong(timeStr);
+                        long diff = currentTime - time;
+                        int days = (int) (diff / (1000 * 60 * 60 * 24));
+                        Log.e("TTTTT", "days is is " + days);
+                        if (hintsCount.containsKey(days))
+                            hintsCount.put(days, hintsCount.get(days) + 1);
+                        else
+                            hintsCount.put(days, 1);
+                    }
+                } else{
+                    hintsCount.put(0,0);
+                }
+
+
+
 
 
             }
@@ -130,6 +154,26 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
         return series;
 
     }
+
+    private Series hintsOverTime() {
+
+        int earlies = 0;
+        for (int key : hintsCount.keySet()) {
+            if (key > earlies)
+                earlies = key;
+        }
+        int pre = 0;
+        DataPoint[] arr = new DataPoint[earlies + 2];
+        arr[0] = new DataPoint(0, 0);
+        for (int i = earlies; i >= 0; i--) {
+            pre = hintsCount.containsKey(i) ? pre + hintsCount.get(i) : pre;
+            arr[earlies - i + 1] = new DataPoint(earlies - i + 1, pre);
+        }
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(arr);
+        return series;
+
+    }
+
     private Series wordsPerDay() {
 
         int earlies = 0;
@@ -148,6 +192,24 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
 
     }
 
+    private Series hintsPerDay() {
+
+        int earlies = 0;
+        for (int key : hintsCount.keySet()) {
+            if (key > earlies)
+                earlies = key;
+        }
+        DataPoint[] arr = new DataPoint[earlies + 2];
+        arr[0] = new DataPoint(0, 0);
+        for (int i = earlies; i >= 0; i--) {
+            int res = hintsCount.containsKey(i) ? hintsCount.get(i) : 0;
+            arr[earlies - i + 1] = new DataPoint(earlies - i + 1, res);
+        }
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(arr);
+        return series;
+
+    }
+
 
     private void setWordsOverTimeGraph() {
 
@@ -155,6 +217,16 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
         graph.addSeries(wordsOverTime);
         graph.setTitle("Total number of words completed over time");
         String txt = "Total: " + (int)wordsOverTime.getHighestValueY();
+        subText.setText(txt);
+
+    }
+
+    private void setHintsOverTimeGraph() {
+
+        graph.removeAllSeries();
+        graph.addSeries(hintsOverTime);
+        graph.setTitle("Total number of hints used");
+        String txt = "Total: " + (int)hintsOverTime.getHighestValueY();
         subText.setText(txt);
 
     }
@@ -175,6 +247,24 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
             }
         }
 
+        String txt = "Average: " + (sum / count);
+        subText.setText(txt);
+    }
+    private void setHintsPerDayGraph(){
+        graph.removeAllSeries();
+        graph.addSeries(hintsPerDay);
+        graph.setTitle("Hints used per day");
+        int count = 0;
+        double sum = 0;
+
+        Iterator<DataPoint> it = hintsPerDay.getValues(hintsPerDay.getLowestValueX(), hintsPerDay.getHighestValueX());
+        while(it.hasNext()){
+            DataPoint d = it.next();
+            if(d.getX() != 0) {
+                sum += d.getY();
+                count++;
+            }
+        }
 
         String txt = "Average: " + (sum / count);
         subText.setText(txt);
@@ -188,6 +278,10 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
             setWordsOverTimeGraph();
         else if (itemString.equals("Words per day"))
             setWordsPerDayGraph();
+        else if(itemString.equals("Total Hints used"))
+            setHintsOverTimeGraph();
+        else if (itemString.equals("Hits per day"))
+            setHintsPerDayGraph();
     }
 
     @Override

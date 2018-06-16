@@ -39,7 +39,8 @@
     <string-array name="stats_array">
         <item>Total Words</item>
         <item>Words per day</item>
-
+        <item>Total Hints used</item>
+        <item>Hits per day</item>
     </string-array>
 
 
