@@ -98,9 +98,11 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
     RequestQueue myRequestQueue;
 
     CallbackManager callbackManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e("TTTTT", "login started");
         setContentView(R.layout.activity_login);
         myRequestQueue = Volley.newRequestQueue(this);
 
@@ -131,7 +133,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
                         if (!dataSnapshot.hasChild(token.getUserId())) {
                             //createNewUser(account.getId());
                             postToServer(token.getUserId(), null, token);
-                        } else{
+                        } else {
                             updateUI(null, token);
                         }
 
@@ -155,19 +157,18 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
 
             }
         });
-            }
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
-
-            updateUI(account,null);
+            updateUI(account, null);
         }
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if(accessToken != null && !accessToken.isExpired()){
-            updateUI(null,accessToken);
+        if (accessToken != null && !accessToken.isExpired()) {
+            updateUI(null, accessToken);
 
         }
 
@@ -175,7 +176,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    //    callbackManager.onActivityResult(requestCode, resultCode, data);
+        //    callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
@@ -184,7 +185,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
             // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
-        } else{
+        } else {
             callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -200,7 +201,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
                     if (!dataSnapshot.hasChild(account.getId())) {
                         //createNewUser(account.getId());
                         postToServer(account.getId(), account, null);
-                    } else{
+                    } else {
                         updateUI(account, null);
                     }
 
@@ -222,31 +223,12 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         }
     }
 
-    private void createNewUser(String id) {
-        Map<String, Object> map = new HashMap<>();
-
-        try {
-            String newRef = downloadUrl(new URL("http://trendy-words.herokuapp.com/newUser?level=BEGINNER"));
-            map.put("trendyId", newRef);
-            map.put("difficulty", "BEGINNER");
-        } catch (Exception e) {
-        }
-
-        map.put("points", 1000);
-        for (int i = 1; i <= 10; i++)
-            map.put("achievements/a" + i, 0);
-
-        for (int i = 1; i <= 6; i++)
-            map.put("categories/" + CategoriesActivity.CategoryEnum.getCatFromIndex(i).name, 0);
-
-        ref.child(id).updateChildren(map);
-    }
-
     private void updateUI(GoogleSignInAccount account, AccessToken faceToken) {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.putExtra("GoogleAccount", account);
         intent.putExtra("FacebookToken", faceToken);
         startActivity(intent);
+        finish();
     }
 
 
@@ -266,72 +248,14 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
     }
 
 
-    private String downloadUrl(URL url) throws IOException {
-        InputStream stream = null;
-        HttpURLConnection connection = null;
-        String result = null;
-        try {
-            connection = (HttpURLConnection) url.openConnection();
-            // Timeout for reading InputStream arbitrarily set to 3000ms.
-            connection.setReadTimeout(20000);
-            // Timeout for connection.connect() arbitrarily set to 3000ms.
-            connection.setConnectTimeout(20000);
-            // For this use case, set HTTP method to GET.
-            connection.setRequestMethod("POST");
-            // Already true by default but setting just in case; needs to be true since this request
-            // is carrying an input (response) body.
-            connection.setDoInput(true);
-            // Open communications link (network traffic occurs here).
-            connection.connect();
-            int responseCode = connection.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP error code: " + responseCode);
-            }
-            // Retrieve the response body as an InputStream.
-            stream = connection.getInputStream();
-            if (stream != null) {
-                // Converts Stream to String with max length of 5000000.
-                result = readStream(stream, 5000000);
-            }
-        } finally {
-            // Close Stream and disconnect HTTPS connection.
-            if (stream != null) {
-                stream.close();
-            }
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-        return result;
-    }
-
-    public String readStream(InputStream stream, int maxReadSize)
-            throws IOException, UnsupportedEncodingException {
-        Reader reader = null;
-        reader = new InputStreamReader(stream, "UTF-8");
-        char[] rawBuffer = new char[maxReadSize];
-        int readSize;
-        StringBuffer buffer = new StringBuffer();
-        while (((readSize = reader.read(rawBuffer)) != -1) && maxReadSize > 0) {
-            if (readSize > maxReadSize) {
-                readSize = maxReadSize;
-            }
-            buffer.append(rawBuffer, 0, readSize);
-            maxReadSize -= readSize;
-        }
-        return buffer.toString();
-    }
-
     private void postToServer(final String myId, final GoogleSignInAccount account, final AccessToken token) {
         String postUrl = "http://trendy-words.herokuapp.com/newUser?level=BEGINNER";
 
 
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST,postUrl, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, postUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.e("TTTT", "response is : " + response.toString());
-
 
 
                 Map<String, Object> map = new HashMap<>();

@@ -159,6 +159,7 @@ public class CategoriesActivity extends AppCompatActivity {
 
                 myRequestQueue.add(stringRequest);
 
+                MainActivity.root = null;
                 NavUtils.navigateUpFromSameTask(selfPointer);
 
             }

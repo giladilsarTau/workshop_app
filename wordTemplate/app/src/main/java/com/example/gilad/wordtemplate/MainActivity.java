@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if (s != null)
-                    if (s.equals("hints"))
+                    if (s.equals("difficulty"))
                         ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString((int) (long) dataSnapshot.getValue()));
             }
 
@@ -269,47 +269,9 @@ public class MainActivity extends AppCompatActivity
                     }
                 }, 2000);
 
-//
-//                if (ShareDialog.canShow(ShareLinkContent.class)) {
-//                    ShareLinkContent linkContent = new ShareLinkContent.Builder()
-//                            .setContentUrl(Uri.parse("http://developers.facebook.com/android"))
-//                            .build();
-//                    shareDialog.show(linkContent);
-//                }
             }
         });
-//        callbackManager = CallbackManager.Factory.create();
-//        shareDialog = new ShareDialog(this);
-//        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
-//            @Override
-//            public void onSuccess(Sharer.Result result) {
-//
-//            }
-//
-//            @Override
-//            public void onCancel() {
-//
-//            }
-//
-//            @Override
-//            public void onError(FacebookException error) {
-//
-//            }
-//        });
-//        try {
-//            PackageInfo info = getPackageManager().getPackageInfo(
-//                    "com.example.gilad.wordtemplate",
-//                    PackageManager.GET_SIGNATURES);
-//            for (Signature signature : info.signatures) {
-//                MessageDigest md = MessageDigest.getInstance("SHA");
-//                md.update(signature.toByteArray());
-//                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-//            }
-//        } catch (PackageManager.NameNotFoundException e) {
-//
-//        } catch (NoSuchAlgorithmException e) {
-//
-//        }
+
 
     }
 
@@ -596,7 +558,7 @@ public class MainActivity extends AppCompatActivity
             maxAchivMap.put("a7", 50);
             maxAchivMap.put("a8", 100);
             maxAchivMap.put("a9", 100);
-            maxAchivMap.put("a10", 3);
+            maxAchivMap.put("a10", 1);
         }
 
     }
@@ -701,15 +663,23 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 account = null;
+                                accountInit = false;
+                                root = null;
+                                LoginActivity.mGoogleSignInClient = null;
                                 Intent intent = new Intent(selfPointer, LoginActivity.class);
                                 startActivity(intent);
+                                finish();
                             }
                         });
             } else {
                 LoginManager.getInstance().logOut();
                 token = null;
+                account = null;
+                accountInit = false;
+                root = null;
                 Intent intent = new Intent(selfPointer, LoginActivity.class);
                 startActivity(intent);
+                finish();
             }
         } else if (id == R.id.nav_achiv) {
             FragmentManager fm;

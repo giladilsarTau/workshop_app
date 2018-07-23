@@ -50,10 +50,10 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
         holder.mProgText.setText(s);
 
 
-        if(holder.mProgress.getMax() > holder.mProgress.getProgress())
-            holder.mImage.setImageResource(posToImage(position+1));
+        if (holder.mProgress.getMax() > holder.mProgress.getProgress())
+            holder.mImage.setImageResource(posToImage(position + 1));
         else
-            holder.mImage.setImageResource(R.drawable.medal_a1_completed);
+            holder.mImage.setImageResource(posToImage(position + 1, true));
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,22 +97,68 @@ public class MyAchivRecyclerViewAdapter extends RecyclerView.Adapter<MyAchivRecy
         }
     }
 
-    public static int posToImage(int pos){
-        switch (pos){
-            case 1: return R.drawable.medal_a1;
-            case 2: return R.drawable.medal_a2;
-            case 3: return R.drawable.medal_a3;
-            case 4: return R.drawable.medal_a4;
-            case 5: return R.drawable.medal_a5;
-            case 6: return R.drawable.medal_a6;
-            case 7: return R.drawable.medal_a7;
-            case 8: return R.drawable.medal_a8;
-            case 9: return R.drawable.medal_a9;
-            case 10: return R.drawable.medal_a10;
+    public static int posToImage(int pos, boolean isCompleted) {
+        switch (pos) {
+            case 1:
+                if (!isCompleted)
+                    return R.drawable.medal_a1;
+                else
+                    return R.drawable.medal_a1_completed;
+            case 2:
+                if (!isCompleted)
+                    return R.drawable.medal_a2;
+                else
+                    return R.drawable.medal_a2_completed;
+            case 3:
+                if (!isCompleted)
+                    return R.drawable.medal_a3;
+                else
+                    return R.drawable.medal_a3_completed;
+            case 4:
+                if (!isCompleted)
+                    return R.drawable.medal_a4;
+                else
+                    return R.drawable.medal_a4_completed;
+            case 5:
+                if (!isCompleted)
+                    return R.drawable.medal_a5;
+                else
+                    return R.drawable.medal_a5_completed;
+            case 6:
+                if (!isCompleted)
+                    return R.drawable.medal_a6;
+                else
+                    return R.drawable.medal_a6_completed;
+            case 7:
+                if (!isCompleted)
+                    return R.drawable.medal_a7;
+                else
+                    return R.drawable.medal_a7_completed;
+            case 8:
+                if (!isCompleted)
+                    return R.drawable.medal_a8;
+                else
+                    return R.drawable.medal_a8_completed;
+            case 9:
+                if (!isCompleted)
+                    return R.drawable.medal_a9;
+                else
+                    return R.drawable.medal_a9_completed;
+            case 10:
+                if (!isCompleted)
+                    return R.drawable.medal_a10;
+                else
+                    return R.drawable.medal_a10_completed;
             default:
                 Log.e("TTTTT", "Wrong position: " + pos);
                 return -1;
 
         }
     }
+
+    public static int posToImage(int pos) {
+        return posToImage(pos, false);
+    }
+
+
 }
