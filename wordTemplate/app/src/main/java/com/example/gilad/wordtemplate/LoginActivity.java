@@ -73,6 +73,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -266,13 +267,16 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
                     map.put("difficulty", "BEGINNER");
                 } catch (Exception e) {
                 }
-
+                map.put("loginTimes/" + Calendar.getInstance().getTime().getTime(), 1);
                 map.put("points", 1000);
                 for (int i = 1; i <= 10; i++)
                     map.put("achievements/a" + i, 0);
 
-                for (int i = 1; i <= 6; i++)
+                for (int i = 1; i <= 6; i++) {
                     map.put("categories/" + CategoriesActivity.CategoryEnum.getCatFromIndex(i).name, 0);
+                    map.put("solvedCats/" + CategoriesActivity.CategoryEnum.getCatFromIndex(i).name, 0);
+
+                }
 
                 ref.child(myId).updateChildren(map);
                 updateUI(account, token);

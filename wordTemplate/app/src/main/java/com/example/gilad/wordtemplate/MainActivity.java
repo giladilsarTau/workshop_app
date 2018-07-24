@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if (s != null)
-                    if (s.equals("difficulty"))
+                    if (s.equals("loginTimes"))
                         ((TextView) findViewById(R.id.point_amount)).setText(Integer.toString((int) (long) dataSnapshot.getValue()));
             }
 
@@ -222,6 +222,30 @@ public class MainActivity extends AppCompatActivity
                     mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), url, mcall);
                     startDownload();
                 }
+
+
+                //get login times for the login achievement
+
+                if (u.loginTimes != null) {
+                    long currentTime = Calendar.getInstance().getTime().getTime();
+                    long latest = 0;
+                    for (String timeStr : u.hints.keySet()) {
+                        long time = Long.parseLong(timeStr);
+                        if (time > latest)
+                            latest = time;
+                    }
+                    long diff = currentTime - latest;
+                    int days = (int) (diff / (1000 * 60 * 60 * 24));
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("loginTimes/" + currentTime, 1);
+                    if (days == 1)
+                        increaseAchiv(update, "a2");
+                    else if (days >= 2)
+                        setAchiv(update, "a2", 0);
+
+                }
+
+
             }
 
             @Override
@@ -243,9 +267,8 @@ public class MainActivity extends AppCompatActivity
                 }
 
 
-
                 Map<String, Object> update = new HashMap<>();
-                setAchiv(update,"a7",0);
+                setAchiv(update, "a7", 0);
 
 
                 FirebaseDatabase db = FirebaseDatabase.getInstance();
@@ -288,6 +311,16 @@ public class MainActivity extends AppCompatActivity
             mNetworkFragment.startDownload();
             mDownloading = true;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        token = null;
+        account = null;
+        accountInit = false;
+        root = null;
+        LoginActivity.mGoogleSignInClient = null;
     }
 
     public void initWords() {
@@ -445,8 +478,8 @@ public class MainActivity extends AppCompatActivity
                     Map<String, Object> update = new HashMap<>();
                     Map<String, Object> seenWord = new HashMap<>();
                     update.put("points", thisUser.points);
-                    if(thisUser.points < maxAchivMap.get("a6"))
-                        setAchiv(update,"a6",thisUser.points);
+                    if (thisUser.points < maxAchivMap.get("a6"))
+                        setAchiv(update, "a6", thisUser.points);
 
 
                     increaseAchiv(update, "a1");
@@ -464,6 +497,26 @@ public class MainActivity extends AppCompatActivity
                     seenWord.put("time", Calendar.getInstance().getTime().getTime());
                     seenWord.put("category", currentWordCategory);
 
+                    //update categories solved
+                    if (thisUser.solvedCats.get(currentWordCategory) < 100) {
+                        thisUser.solvedCats.put(currentWordCategory, thisUser.solvedCats.get(currentWordCategory) + 1);
+                        update.put("solvedCats/" + currentWordCategory, thisUser.solvedCats.get(currentWordCategory));
+                        if (thisUser.solvedCats.get(currentWordCategory) == 100)
+                            increaseAchiv(update, "a9");
+                        //get highest
+                        int highest = 0;
+                        String cat = "";
+                        for (String s : thisUser.solvedCats.keySet()) {
+                            if (thisUser.solvedCats.get(s) > highest) {
+                                highest = thisUser.solvedCats.get(s);
+                                cat = s;
+                            }
+                        }
+                        if (cat.equals(currentWordCategory))
+                            increaseAchiv(update, "a8");
+                    }
+
+
                     try {
                         String level = currJsonWord.getString("level");
                         if (!level.equals("null")) {
@@ -479,6 +532,7 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     update.put("solved/" + word, seenWord);
+
 
                     ref.child(myDBId).updateChildren(update);
 
@@ -523,12 +577,13 @@ public class MainActivity extends AppCompatActivity
 
         }
     }
+
     private void setAchiv(Map<String, Object> map, String achiv, int value) {
 
         int curr = thisUser.achievements.get(achiv);
         if (curr < maxAchivMap.get(achiv)) {
 
-            thisUser.achievements.put(achiv,value);
+            thisUser.achievements.put(achiv, value);
 
             map.put("achievements/" + achiv, thisUser.achievements.get(achiv));
 
@@ -557,7 +612,7 @@ public class MainActivity extends AppCompatActivity
             maxAchivMap.put("a6", 25000);
             maxAchivMap.put("a7", 50);
             maxAchivMap.put("a8", 100);
-            maxAchivMap.put("a9", 100);
+            maxAchivMap.put("a9", 6);
             maxAchivMap.put("a10", 1);
         }
 
@@ -662,10 +717,6 @@ public class MainActivity extends AppCompatActivity
                         .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                account = null;
-                                accountInit = false;
-                                root = null;
-                                LoginActivity.mGoogleSignInClient = null;
                                 Intent intent = new Intent(selfPointer, LoginActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -673,10 +724,6 @@ public class MainActivity extends AppCompatActivity
                         });
             } else {
                 LoginManager.getInstance().logOut();
-                token = null;
-                account = null;
-                accountInit = false;
-                root = null;
                 Intent intent = new Intent(selfPointer, LoginActivity.class);
                 startActivity(intent);
                 finish();
