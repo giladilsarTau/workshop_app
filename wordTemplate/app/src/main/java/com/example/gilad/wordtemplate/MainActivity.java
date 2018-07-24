@@ -1,5 +1,6 @@
 package com.example.gilad.wordtemplate;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -114,10 +115,14 @@ public class MainActivity extends AppCompatActivity
     boolean isPerfectWord;
     boolean usedHint;
 
+    static ProgressDialog dialog;
 
     public static Map<String, Integer> maxAchivMap = null;
     CallbackManager callbackManager;
     ShareDialog shareDialog;
+
+    FirebaseDatabase db = FirebaseDatabase.getInstance();
+    DatabaseReference ref = db.getReference();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +136,7 @@ public class MainActivity extends AppCompatActivity
         }
         myDBId = account == null ? token.getUserId() : account.getId();
         initAchivMap();
+        callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -173,8 +179,7 @@ public class MainActivity extends AppCompatActivity
         text.setText(word);
         text.setTextColor(Color.WHITE);
 
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
-        DatabaseReference ref = db.getReference();
+
 
 
         Query query = ref.child(myDBId);
@@ -220,6 +225,14 @@ public class MainActivity extends AppCompatActivity
                     Log.e("TRENDY WORDS", "starting to download form: " + url);
 
                     mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), url, mcall);
+
+
+                    dialog = new ProgressDialog(selfPointer);
+                    dialog.setMessage("Loading Words");
+                    dialog.setCancelable(false);
+                    dialog.setInverseBackgroundForced(false);
+                    dialog.show();
+
                     startDownload();
                 }
 
@@ -229,7 +242,7 @@ public class MainActivity extends AppCompatActivity
                 if (u.loginTimes != null) {
                     long currentTime = Calendar.getInstance().getTime().getTime();
                     long latest = 0;
-                    for (String timeStr : u.hints.keySet()) {
+                    for (String timeStr : u.loginTimes.keySet()) {
                         long time = Long.parseLong(timeStr);
                         if (time > latest)
                             latest = time;
@@ -242,6 +255,8 @@ public class MainActivity extends AppCompatActivity
                         increaseAchiv(update, "a2");
                     else if (days >= 2)
                         setAchiv(update, "a2", 0);
+                    ref.child(myDBId).updateChildren(update);
+
 
                 }
 
@@ -295,7 +310,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
     }
 
     @Override
@@ -313,13 +327,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+
+    private void cleanUp() {
         token = null;
         account = null;
         accountInit = false;
         root = null;
+        thisUser = null;
         LoginActivity.mGoogleSignInClient = null;
     }
 
@@ -719,6 +733,7 @@ public class MainActivity extends AppCompatActivity
                             public void onComplete(@NonNull Task<Void> task) {
                                 Intent intent = new Intent(selfPointer, LoginActivity.class);
                                 startActivity(intent);
+                                cleanUp();
                                 finish();
                             }
                         });
@@ -726,6 +741,7 @@ public class MainActivity extends AppCompatActivity
                 LoginManager.getInstance().logOut();
                 Intent intent = new Intent(selfPointer, LoginActivity.class);
                 startActivity(intent);
+                cleanUp();
                 finish();
             }
         } else if (id == R.id.nav_achiv) {
@@ -805,6 +821,8 @@ public class MainActivity extends AppCompatActivity
                 }
             });
             Log.e("TTTTTT", "Amount of words is " + root.length());
+            dialog.hide();
+            initWords();
         } catch (Exception e) {
             Log.e("BAD ERROR", e.getMessage());
         }

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ public class AchivCompleteFrag extends DialogFragment {
     CallbackManager callbackManager;
 
     private OnFragmentInteractionListener mListener;
+    String[] arr;
 
     public AchivCompleteFrag() {
         // Required empty public constructor
@@ -62,22 +64,6 @@ public class AchivCompleteFrag extends DialogFragment {
 
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
-        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
-            @Override
-            public void onSuccess(Sharer.Result result) {
-
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-
-            }
-        });
 
         view.findViewById(R.id.sweetBtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,15 +72,21 @@ public class AchivCompleteFrag extends DialogFragment {
             }
         });
 
+
+        ((ImageView) view.findViewById(R.id.completeImg)).setImageResource(MyAchivRecyclerViewAdapter.posToImage(pos));
+        int id = father.getResources().getIdentifier(ACHIV, "array", father.getPackageName());
+        arr = father.getResources().getStringArray(id);
+        ((TextView) view.findViewById(R.id.completeDescription)).setText(arr[2]);
+
         view.findViewById(R.id.completeShare).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (ShareDialog.canShow(ShareLinkContent.class)) {
+                if (ShareDialog.canShow(SharePhotoContent.class)) {
                     Bitmap bm = BitmapFactory.decodeResource(father.getResources(), MyAchivRecyclerViewAdapter.posToImage(pos));
                     SharePhoto photo = new SharePhoto.Builder()
                             .setBitmap(bm)
-                            .setCaption("Check out my newest achievement in TrendyWords!")
+                            .setCaption("I've won the " + arr[0] + " achievement in TrendyWords, check it out")
                             .build();
                     SharePhotoContent content = new SharePhotoContent.Builder()
                             .addPhoto(photo)
@@ -102,15 +94,15 @@ public class AchivCompleteFrag extends DialogFragment {
                     shareDialog.show(content);
 
 
-
+                } else if (ShareDialog.canShow(ShareLinkContent.class)) {
+                    ShareLinkContent linkContent = new ShareLinkContent.Builder()
+                            .setContentUrl(Uri.parse("http://link-to-the-app.com"))
+                            .setQuote("I've won the " + arr[0] + " achievement in TrendyWords, check it out")
+                            .build();
+                    shareDialog.show(linkContent);
                 }
             }
         });
-
-        ((ImageView)view.findViewById(R.id.completeImg)).setBackgroundResource(MyAchivRecyclerViewAdapter.posToImage(pos));
-        int id = father.getResources().getIdentifier(ACHIV, "array", father.getPackageName());
-        String[] arr = father.getResources().getStringArray(id);
-        ((TextView)view.findViewById(R.id.completeDescription)).setText(arr[2]);
         return view;
     }
 
@@ -121,12 +113,6 @@ public class AchivCompleteFrag extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         getDialog().setTitle("Achievement Complete!");
 
-    }
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
