@@ -40,7 +40,51 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "108445698940-ashrahvvcvvglps4004g6tn3emgqd6uc.apps.googleusercontent.com",
+              "client_id": "108445698940-7ts1au8qe8phov8oou8slp9jjpe0jt6o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108445698940:android:fdb8f21f035cbfde",
+        "android_client_info": {
+          "package_name": "com.giladi.trendywords"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "108445698940-o9kp207vofkcn77grp3pla43t7jqd5o3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.giladi.trendywords",
+            "certificate_hash": "60c3c11a26f54d675840698cfd2cec89cb014d50"
+          }
+        },
+        {
+          "client_id": "108445698940-ashrahvvcvvglps4004g6tn3emgqd6uc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAitT0It_mnzSmTWEVaG4EjfgKHHNo7N-A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "108445698940-7ts1au8qe8phov8oou8slp9jjpe0jt6o.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

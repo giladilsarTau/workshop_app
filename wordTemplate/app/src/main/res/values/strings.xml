@@ -93,9 +93,8 @@
     <string-array name="a10">
         <item>Hidden</item>
         <item>This achievement is hidden</item>
-        <item>answered 100 words in each category</item>
+        <item>You gave up 10 times, knowing less then John Snow</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
