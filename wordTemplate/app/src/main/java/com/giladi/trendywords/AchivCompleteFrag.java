@@ -76,7 +76,7 @@ public class AchivCompleteFrag extends DialogFragment {
         });
 
 
-        ((ImageView) view.findViewById(R.id.completeImg)).setImageResource(MyAchivRecyclerViewAdapter.posToImage(pos));
+        ((ImageView) view.findViewById(R.id.completeImg)).setImageResource(MyAchivRecyclerViewAdapter.posToImage(pos, pos==10));
         int id = father.getResources().getIdentifier(ACHIV, "array", father.getPackageName());
         arr = father.getResources().getStringArray(id);
         ((TextView) view.findViewById(R.id.completeDescription)).setText(arr[2]);
