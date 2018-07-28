@@ -46,8 +46,8 @@
 
     <string-array name="a1">
         <item>Solver</item>
-        <item>Solve 100 words</item>
-        <item>solved 100 words correctly</item>
+        <item>Solve 12 words</item>
+        <item>solved 12 words correctly</item>
     </string-array>
     <string-array name="a2">
         <item>Player</item>

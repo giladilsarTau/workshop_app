@@ -68,6 +68,9 @@ public class AchivCompleteFrag extends DialogFragment {
         view.findViewById(R.id.sweetBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                father = null;
+                shareDialog = null;
+                callbackManager=null;
                 getDialog().dismiss();
             }
         });

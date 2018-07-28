@@ -67,6 +67,14 @@
           }
         },
         {
+          "client_id": "108445698940-bfjvdtrq08vm19jatnbmu7ik6vjbagso.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.giladi.trendywords",
+            "certificate_hash": "849849fbc9adc92e50142ef32da713ddafa2d632"
+          }
+        },
+        {
           "client_id": "108445698940-ashrahvvcvvglps4004g6tn3emgqd6uc.apps.googleusercontent.com",
           "client_type": 3
         }

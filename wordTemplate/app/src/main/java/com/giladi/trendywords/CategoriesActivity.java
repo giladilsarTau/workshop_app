@@ -49,6 +49,9 @@ public class CategoriesActivity extends AppCompatActivity {
 
     String trendyId;
     private static final Map<String, Integer> catMap = new HashMap<>();
+    Query query;
+    FirebaseDatabase db;
+    DatabaseReference ref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +93,11 @@ public class CategoriesActivity extends AppCompatActivity {
             ImageButton btn = (ImageButton) findViewById(id);
             btn.setBackground(new ColorDrawable(getColor(R.color.catGray)));
         }
+        db = FirebaseDatabase.getInstance();
+        ref = db.getReference();
 
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
-        DatabaseReference ref = db.getReference();
-
+        query = ref.child(id);
         //Query query = ref.child(userTrendyID).child("achievements");
-        Query query = ref.child(id);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -135,7 +137,7 @@ public class CategoriesActivity extends AppCompatActivity {
                 ref.child(id).updateChildren(map);
 
 
-                String postUrl = "http://trendy-words.herokuapp.com/" + trendyId + "?level=" +  DiffEnum.getDiffFromIndex(seekBar.getProgress()).name;
+                String postUrl = "http://trendy-words.herokuapp.com/" + trendyId + "?level=" + DiffEnum.getDiffFromIndex(seekBar.getProgress()).name;
 
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, postUrl,
                         new Response.Listener<String>() {
@@ -159,6 +161,7 @@ public class CategoriesActivity extends AppCompatActivity {
 
                 MainActivity.root = null;
                 NavUtils.navigateUpFromSameTask(selfPointer);
+                cleanUp();
 
             }
         });
@@ -171,6 +174,12 @@ public class CategoriesActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.cat_menu, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        cleanUp();
     }
 
 
@@ -195,6 +204,13 @@ public class CategoriesActivity extends AppCompatActivity {
             }
 
         }
+    }
+
+    protected  void  cleanUp(){
+        this.query = null;
+        this.db = null;
+        this.ref = null;
+        this.selfPointer = null;
     }
 
 

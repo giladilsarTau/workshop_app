@@ -65,7 +65,7 @@ public class statsActivity extends AppCompatActivity implements AdapterView.OnIt
 
 
         graph = (GraphView) findViewById(R.id.graph);
-        graph.setTitleTextSize(45);
+        graph.setTitleTextSize(30);
         subText = (TextView) findViewById(R.id.statSubText);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

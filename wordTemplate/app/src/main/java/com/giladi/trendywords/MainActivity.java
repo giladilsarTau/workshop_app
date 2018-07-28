@@ -345,6 +345,7 @@ public class MainActivity extends AppCompatActivity
         accountInit = false;
         root = null;
         thisUser = null;
+        selfPointer = null;
         LoginActivity.mGoogleSignInClient = null;
     }
 
@@ -404,7 +405,6 @@ public class MainActivity extends AppCompatActivity
     public void setChoicesBoxes() {
         transSoFar = "";
         choiceSelectMap = new HashMap<>();
-
         for (int i = 1; i <= numOfSelections; i++) {
             int id = getResources().getIdentifier("selection_" + i, "id", getPackageName());
             Button b = (Button) findViewById(id);
@@ -629,7 +629,7 @@ public class MainActivity extends AppCompatActivity
     private void initAchivMap() {
         if (maxAchivMap == null) {
             maxAchivMap = new HashMap<>();
-            maxAchivMap.put("a1", 100);
+            maxAchivMap.put("a1", 12);
             maxAchivMap.put("a2", 7);
             maxAchivMap.put("a3", 50);
             maxAchivMap.put("a4", 50);
@@ -731,9 +731,12 @@ public class MainActivity extends AppCompatActivity
 
 
         } else if (id == R.id.nav_cats) {
+            root = null;
+
             //go to categories
             Intent intent = new Intent(this, CategoriesActivity.class);
             intent.putExtra("ID", myDBId);
+            selfPointer = null;
             startActivity(intent);
 
         } else if (id == R.id.logout) {
